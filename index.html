@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f5d46">
+<title>切花価格表</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --card:#ffffff; --ink:#1f2a24; --sub:#6b746e; --line:#e4e0d8;
+    --accent:#2f5d46; --accent-soft:#e3ece6; --price:#b23a48;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141816; --card:#1d2320; --ink:#eef1ef; --sub:#9aa39d; --line:#2c3430;
+      --accent:#8fc3a5; --accent-soft:#24312a; --price:#ff8a96; }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","BIZ UDPGothic","Yu Gothic UI","Meiryo",sans-serif;
+    line-height:1.5}
+  header{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;
+    padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
+  @media (prefers-color-scheme: dark){ header{color:#10160f} }
+  .shop{font-size:13px;opacity:.85;letter-spacing:.05em}
+  h1{margin:0;font-size:21px;font-weight:700}
+  .updated{font-size:12px;opacity:.9;margin-top:2px}
+  .tools{position:sticky;top:var(--hh,78px);z-index:9;background:var(--bg);padding:10px 0 6px;border-bottom:1px solid var(--line)}
+  .search{margin:0 16px;display:flex;align-items:center;gap:8px;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;padding:0 12px}
+  .search input{flex:1;border:0;outline:0;background:transparent;color:var(--ink);font-size:16px;padding:11px 0}
+  .search button{border:0;background:none;color:var(--sub);font-size:20px;padding:4px;display:none}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding:10px 16px 4px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);
+    border-radius:999px;padding:6px 12px;font-size:13px;white-space:nowrap}
+  .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  @media (prefers-color-scheme: dark){ .chip[aria-pressed="true"]{color:#10160f} }
+  main{padding:8px 16px 40px;max-width:720px;margin:0 auto}
+  section{margin-top:18px}
+  h2{font-size:17px;margin:0 0 6px;padding-left:10px;border-left:4px solid var(--accent);display:flex;align-items:baseline;gap:8px}
+  h2 small{font-size:12px;color:var(--sub);font-weight:400}
+  .list{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+  .row:first-child{border-top:0}
+  .info{flex:1;min-width:0}
+  .name{font-size:16px;font-weight:600;overflow-wrap:anywhere}
+  .meta{font-size:12.5px;color:var(--sub);margin-top:2px;display:flex;flex-wrap:wrap;gap:4px 10px}
+  .color{display:inline-block;background:var(--accent-soft);color:var(--ink);border-radius:6px;padding:0 6px}
+  .price{text-align:right;flex:none}
+  .yen{font-size:20px;font-weight:700;color:var(--price);font-variant-numeric:tabular-nums}
+  .unit{font-size:11px;color:var(--sub)}
+  .empty{text-align:center;color:var(--sub);padding:40px 0}
+  footer{text-align:center;font-size:11.5px;color:var(--sub);padding:0 16px 32px}
+</style>
+</head>
+<body>
+<header id="hd">
+  <div class="shop" id="shop"></div>
+  <h1>本日の切花価格</h1>
+  <div class="updated" id="updated">読み込み中…</div>
+</header>
+<div class="tools" id="tools">
+  <label class="search">
+    <span aria-hidden="true">🔍</span>
+    <input id="q" type="search" placeholder="花の名前・色で探す" autocomplete="off">
+    <button id="clear" type="button" aria-label="クリア">×</button>
+  </label>
+  <div class="chips" id="chips"></div>
+</div>
+<main id="list"></main>
+<footer>価格はすべて税込です。入荷状況により売り切れの場合がございます。</footer>
+
+<script>
+(function(){
+  var SHOP = "サンマルコ";
+  document.getElementById("shop").textContent = SHOP;
+  document.title = SHOP + " 切花価格表";
+
+  var state = { q: "", cat: "" }, data = null;
+  var $ = function(id){ return document.getElementById(id); };
+  var yen = function(n){ return "¥" + Number(n).toLocaleString("ja-JP"); };
+  var norm = function(s){ return (s || "").normalize("NFKC").toLowerCase()
+    .replace(/[ァ-ヶ]/g, function(c){ return String.fromCharCode(c.charCodeAt(0) - 0x60); }); };
+
+  function setHeaderHeight(){ document.documentElement.style.setProperty("--hh", $("hd").offsetHeight + "px"); }
+  addEventListener("resize", setHeaderHeight);
+
+  function render(){
+    var groups = [], map = {};
+    var q = norm(state.q);
+    data.items.forEach(function(it){
+      // it = [品名, 品種, 色, 産地, 単位, 税別, 税込]
+      if (state.cat && it[0] !== state.cat) return;
+      if (q && norm(it.slice(0,4).join(" ")).indexOf(q) < 0) return;
+      if (!map[it[0]]) { map[it[0]] = []; groups.push(it[0]); }
+      map[it[0]].push(it);
+    });
+    var html = groups.map(function(g){
+      return '<section><h2>' + esc(g) + '<small>' + map[g].length + '種</small></h2><div class="list">' +
+        map[g].map(function(it){
+          var meta = [];
+          if (it[2]) meta.push('<span class="color">' + esc(it[2]) + '</span>');
+          if (it[3]) meta.push('<span>' + esc(it[3]) + '産</span>');
+          return '<div class="row"><div class="info"><div class="name">' + esc(it[1] || it[0]) + '</div>' +
+            (meta.length ? '<div class="meta">' + meta.join("") + '</div>' : '') + '</div>' +
+            '<div class="price"><div class="yen">' + yen(it[6]) + '</div><div class="unit">' + esc(it[4]) + ' 税込</div></div></div>';
+        }).join("") + '</div></section>';
+    }).join("");
+    $("list").innerHTML = html || '<div class="empty">該当する花が見つかりません</div>';
+  }
+
+  function esc(s){ return String(s).normalize("NFKC").replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  function renderChips(){
+    var cats = [];
+    data.items.forEach(function(it){ if (cats.indexOf(it[0]) < 0) cats.push(it[0]); });
+    $("chips").innerHTML = ['<button class="chip" data-c="" aria-pressed="true">すべて</button>']
+      .concat(cats.map(function(c){ return '<button class="chip" data-c="' + esc(c) + '" aria-pressed="false">' + esc(c) + '</button>'; })).join("");
+  }
+
+  $("chips").addEventListener("click", function(e){
+    var b = e.target.closest(".chip"); if (!b) return;
+    state.cat = b.getAttribute("data-c");
+    [].forEach.call(this.children, function(c){ c.setAttribute("aria-pressed", c === b ? "true" : "false"); });
+    render(); scrollTo({ top: 0 });
+  });
+  $("q").addEventListener("input", function(){ state.q = this.value; $("clear").style.display = this.value ? "block" : "none"; render(); });
+  $("clear").addEventListener("click", function(){ $("q").value = ""; state.q = ""; this.style.display = "none"; render(); });
+
+  // data.js を毎回最新で読み込む（キャッシュ回避）
+  var s = document.createElement("script");
+  s.src = "data.js?t=" + Date.now();
+  s.onload = function(){
+    data = window.PRICE_DATA;
+    $("updated").textContent = data.updated + " 更新　全" + data.items.length + "品";
+    renderChips(); render(); setHeaderHeight();
+  };
+  s.onerror = function(){ $("updated").textContent = "データを読み込めませんでした"; };
+  document.body.appendChild(s);
+  setHeaderHeight();
+})();
+</script>
+</body>
+</html>
