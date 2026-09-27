@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f5d46">
+<title>はじめての方へ</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --card:#ffffff; --ink:#1f2a24; --sub:#6b746e; --line:#e4e0d8;
+    --accent:#2f5d46; --accent-soft:#e3ece6; --on-accent:#fff; --mark:#b23a48;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141816; --card:#1d2320; --ink:#eef1ef; --sub:#9aa39d; --line:#2c3430;
+      --accent:#8fc3a5; --accent-soft:#24312a; --on-accent:#10160f; --mark:#ff8a96; }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","BIZ UDPGothic","Yu Gothic UI","Meiryo",sans-serif;
+    line-height:1.6}
+  header{position:sticky;top:0;z-index:10;background:var(--accent);color:var(--on-accent);
+    padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
+  .shop{font-size:13px;opacity:.85;letter-spacing:.05em}
+  h1{margin:0;font-size:21px;font-weight:700}
+  .steps{display:flex;gap:4px;margin-top:8px}
+  .steps i{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.3)}
+  .steps i.on{background:var(--on-accent)}
+  main{padding:8px 16px 40px;max-width:720px;margin:0 auto}
+  .lead{font-size:15px;margin:14px 0 4px}
+  h2{font-size:19px;margin:18px 0 4px}
+  .hint{font-size:13px;color:var(--sub);margin:0 0 10px}
+  .opts{display:grid;gap:10px}
+  .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:var(--ink);
+    background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer}
+  .opt:active{transform:scale(.99)}
+  .opt .ico{font-size:28px;flex:none;width:36px;text-align:center}
+  .opt b{display:block;font-size:17px}
+  .opt small{display:block;font-size:13px;color:var(--sub)}
+  .opt .tag{margin-left:auto;flex:none;font-size:11.5px;font-weight:700;color:var(--mark);
+    border:1.5px solid var(--mark);border-radius:999px;padding:1px 8px;white-space:nowrap}
+  .grid2{grid-template-columns:1fr 1fr}
+  .grid2 .opt{justify-content:center;text-align:center;flex-direction:column;gap:2px;padding:14px 8px}
+  .grid2 .opt .tag{margin:4px 0 0}
+  .back{margin-top:16px;background:none;border:0;color:var(--sub);font:inherit;font-size:14px;padding:8px 0;cursor:pointer}
+  .note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px;margin-top:14px}
+  .note b{display:block;margin-bottom:2px}
+  .note ul{margin:0;padding-left:1.2em}
+  /* スタッフに見せる画面 */
+  .show{background:var(--card);border:2px solid var(--accent);border-radius:16px;padding:16px;margin-top:14px}
+  .show .cap{font-size:13px;color:var(--sub);text-align:center}
+  .show table{width:100%;border-collapse:collapse;margin-top:8px}
+  .show th{text-align:left;font-size:14px;color:var(--sub);font-weight:400;padding:10px 0;width:5.5em;vertical-align:top}
+  .show td{font-size:24px;font-weight:700;padding:8px 0;line-height:1.35}
+  .show tr+tr th,.show tr+tr td{border-top:1px solid var(--line)}
+  .links{display:grid;gap:10px;margin-top:10px}
+  .link{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;color:var(--ink);text-decoration:none}
+  .link .ico{font-size:24px}
+  .link b{display:block}
+  .link small{color:var(--sub);font-size:13px}
+  .primary{display:block;width:100%;margin-top:16px;border:0;border-radius:14px;background:var(--accent);color:var(--on-accent);
+    font:inherit;font-size:17px;font-weight:700;padding:14px;cursor:pointer}
+  details{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-top:10px}
+  summary{padding:14px 16px;font-weight:700;cursor:pointer}
+  details .body{padding:0 16px 14px;font-size:14.5px}
+  details ol,details ul{margin:0;padding-left:1.3em}
+  footer{text-align:center;font-size:11.5px;color:var(--sub);padding:0 16px 32px}
+</style>
+</head>
+<body>
+<header>
+  <div class="shop" id="shop"></div>
+  <h1>はじめての方へ</h1>
+  <div class="steps" id="steps"></div>
+</header>
+<main id="app"></main>
+<footer>わからないことは、お気軽にスタッフへお声がけください。</footer>
+<script>
+const SHOP = "サンマルコ";
+document.getElementById("shop").textContent = SHOP;
+
+/* 用途 */
+const PURPOSES = [
+  {id:"oiwai",  ico:"🎉", name:"お祝い",       sub:"誕生日・開店・退職・発表会など"},
+  {id:"gift",   ico:"🎁", name:"プレゼント",   sub:"母の日・記念日・ちょっとしたお礼"},
+  {id:"sonae",  ico:"🕊️", name:"お供え",       sub:"ご葬儀・法要・お墓・お仏壇"},
+  {id:"mimai",  ico:"💐", name:"お見舞い",     sub:"入院・療養中の方へ"},
+  {id:"jitaku", ico:"🏠", name:"自宅に飾る",   sub:"自分用・お部屋用"},
+];
+
+/* 形 */
+const STYLES = {
+  hanataba: {ico:"💐", name:"花束",       sub:"手で持って渡せる。飾るときは花瓶に入れます"},
+  arrange:  {ico:"🧺", name:"アレンジ",   sub:"かごに挿してあるので、花瓶なしでそのまま飾れます"},
+  butsuka:  {ico:"🪷", name:"仏花（1対）", sub:"お墓・お仏壇に左右一対で供える束"},
+  hachi:    {ico:"🪴", name:"鉢花",       sub:"根があるので長く楽しめます"},
+  omakase:  {ico:"🙋", name:"決まっていない", sub:"スタッフと相談して決めます"},
+};
+const STYLE_BY_PURPOSE = {
+  oiwai:  ["hanataba","arrange","hachi","omakase"],
+  gift:   ["hanataba","arrange","hachi","omakase"],
+  sonae:  ["arrange","hanataba","butsuka","omakase"],
+  mimai:  ["arrange","hanataba","omakase"],
+  jitaku: ["hanataba","hachi","arrange","omakase"],
+};
+
+/* 予算（popular=よく選ばれる） */
+const BUDGETS = [1000,2000,3000,5000,7000,10000,20000,30000];
+function popular(p, s){
+  if(s==="hanataba") return [3000];
+  if(s==="arrange")  return [5000];
+  if(p==="sonae")    return [3000,5000];
+  return [];
+}
+function budgetRange(p){
+  if(p==="sonae") return "お供えは 3,000円〜10,000円 がよく選ばれています。";
+  if(p==="oiwai") return "お祝いは 1,000円〜30,000円 と幅広く、贈る相手や場面で選ばれています。";
+  return "花束は 3,000円、アレンジは 5,000円 がいちばんよく選ばれています。";
+}
+
+/* 色・雰囲気 */
+const COLORS = {
+  default: ["おまかせ","明るく元気に","やさしい淡い色","赤・ピンク系","黄・オレンジ系","白・グリーン系"],
+  sonae:   ["おまかせ","白・グリーン中心","白に淡い色を少し","故人の好きな色で"],
+};
+
+/* 用途ごとの気をつけること */
+const NOTES = {
+  sonae: ["白や淡い色が中心になります（四十九日を過ぎたら色を入れることもあります）","トゲのある花や香りの強い花は控えるのが一般的です","名札（立札）を付けられます。贈り主のお名前をお伝えください","札幌市内（定山渓を除く）へ配達できます。3,300円（税込）から、西区は配達無料"],
+  mimai: ["鉢植えは「根付く＝寝付く」として避けるのが一般的です","香りの強い花・花粉が落ちる花は控えめにします","病院によっては生花を持ち込めないことがあります。事前にご確認ください","そのまま飾れるアレンジが喜ばれます"],
+  oiwai: ["開店・開業祝いには名札（立札）を付けられます","メッセージカードもご用意できます","札幌市内（定山渓を除く）へ配達できます。3,300円（税込）から、西区は配達無料"],
+  gift:  ["メッセージカードもご用意できます","渡すまで時間があるときはお伝えください。水を含ませてお包みします"],
+  jitaku:["お好きな花を1本から選べます","ご予算を伝えていただければ、その金額でまとめます"],
+};
+
+const state = {p:null, s:null, b:null, c:null};
+const app = document.getElementById("app");
+const esc = t => String(t).replace(/[&<>"]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const yen = n => n.toLocaleString("ja-JP") + "円";
+
+function steps(n){
+  document.getElementById("steps").innerHTML = [1,2,3,4,5].map(i => `<i class="${i<=n?"on":""}"></i>`).join("");
+}
+function go(step){ history.pushState({step, ...state}, ""); render(step); }
+window.addEventListener("popstate", e => {
+  const st = e.state || {step:0};
+  Object.assign(state, {p:st.p||null, s:st.s||null, b:st.b||null, c:st.c||null});
+  render(st.step || 0);
+});
+function back(){ history.back(); }
+const pName = () => PURPOSES.find(x => x.id===state.p).name;
+
+function render(step){
+  steps(step);
+  window.scrollTo(0,0);
+  if(step===0){
+    app.innerHTML = `
+      <p class="lead">ご来店ありがとうございます。<br>花屋がはじめてでも大丈夫です。<b>4つの質問に答えるだけ</b>で、スタッフに伝える内容がまとまります。</p>
+      <button class="primary" onclick="go(1)">はじめる</button>
+      ${extras()}`;
+    return;
+  }
+  if(step===1){
+    app.innerHTML = `<h2>① 何に使いますか？</h2><p class="hint">いちばん近いものを選んでください。</p>
+      <div class="opts">${PURPOSES.map(x => `
+        <button class="opt" onclick="state.p='${x.id}';go(2)"><span class="ico">${x.ico}</span>
+        <span><b>${x.name}</b><small>${x.sub}</small></span></button>`).join("")}</div>
+      <button class="back" onclick="back()">← もどる</button>`;
+    return;
+  }
+  if(step===2){
+    app.innerHTML = `<h2>② どんな形にしますか？</h2><p class="hint">${esc(pName())}には、こんな形があります。</p>
+      <div class="opts">${STYLE_BY_PURPOSE[state.p].map(k => { const x = STYLES[k]; return `
+        <button class="opt" onclick="state.s='${k}';go(3)"><span class="ico">${x.ico}</span>
+        <span><b>${x.name}</b><small>${x.sub}</small></span></button>`; }).join("")}</div>
+      <button class="back" onclick="back()">← もどる</button>`;
+    return;
+  }
+  if(step===3){
+    const pop = popular(state.p, state.s);
+    const list = state.p==="sonae" ? BUDGETS.filter(b => b>=2000 && b<=20000) : BUDGETS;
+    app.innerHTML = `<h2>③ ご予算は？</h2><p class="hint">${budgetRange(state.p)}<br>金額に合わせてお作りします（税込）。</p>
+      <div class="opts grid2">${list.map(b => `
+        <button class="opt" onclick="state.b=${b};go(4)"><b>${yen(b)}</b>${pop.includes(b)?'<span class="tag">よく選ばれる</span>':""}</button>`).join("")}
+        <button class="opt" onclick="state.b='相談';go(4)"><b>相談したい</b></button></div>
+      <button class="back" onclick="back()">← もどる</button>`;
+    return;
+  }
+  if(step===4){
+    const cs = COLORS[state.p==="sonae" ? "sonae" : "default"];
+    app.innerHTML = `<h2>④ 色や雰囲気は？</h2><p class="hint">迷ったら「おまかせ」で大丈夫です。</p>
+      <div class="opts grid2">${cs.map((c,i) => `
+        <button class="opt" onclick="state.c=${i};go(5)"><b>${c}</b></button>`).join("")}</div>
+      <button class="back" onclick="back()">← もどる</button>`;
+    return;
+  }
+  if(step===5){
+    const cs = COLORS[state.p==="sonae" ? "sonae" : "default"];
+    const notes = NOTES[state.p] || [];
+    app.innerHTML = `<h2>この画面をスタッフに見せてください</h2>
+      <div class="show"><div class="cap">ご注文メモ</div><table>
+        <tr><th>用途</th><td>${esc(pName())}</td></tr>
+        <tr><th>形</th><td>${esc(STYLES[state.s].name)}</td></tr>
+        <tr><th>ご予算</th><td>${typeof state.b==="number" ? yen(state.b)+"くらい" : "相談したい"}</td></tr>
+        <tr><th>色</th><td>${esc(cs[state.c])}</td></tr></table></div>
+      ${notes.length ? `<div class="note"><b>${esc(pName())}で知っておくと安心なこと</b><ul>${notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
+      <button class="primary" onclick="history.go(-5)">最初からやり直す</button>
+      ${extras()}`;
+  }
+}
+
+function extras(){
+  return `<h2>そのほかのご案内</h2>
+    <div class="links">
+      <a class="link" href="./"><span class="ico">🌷</span><span><b>本日の切花価格</b><small>1本ずつ選ぶときの値段の目安</small></span></a>
+      <a class="link" href="care.html"><span class="ico">🪴</span><span><b>鉢花の育て方</b><small>水やり・置き場所など</small></span></a>
+    </div>
+    <details><summary>1本ずつ選んで作ってもらうには？</summary><div class="body"><ol>
+      <li>店内やケースの中から好きな花を選びます</li>
+      <li>「この花を○本」とスタッフに伝えます（決めきれなければ予算だけでもOK）</li>
+      <li>用途を伝えると、合う花を足したりラッピングしたりしてまとめます</li></ol></div></details>
+    <details><summary>切花を長持ちさせるコツ</summary><div class="body"><ul>
+      <li>家に着いたら、茎の先を1〜2cm斜めに切ってから花瓶へ</li>
+      <li>水は毎日かえて、花瓶もさっと洗うと長持ちします</li>
+      <li>水につかる部分の葉は取ります（水が傷みやすくなるため）</li>
+      <li>暖房やエアコンの風・直射日光の当たらない、涼しい場所に</li></ul></div></details>
+    <details><summary>ご予約</summary><div class="body"><ul>
+      <li>お電話・FAX・ご来店で承ります</li>
+      <li>お供えや開店祝いなど、日にちが決まっているものは早めのご予約が安心です</li></ul></div></details>
+    <details><summary>配達</summary><div class="body"><ul>
+      <li>札幌市内へお届けします（定山渓は除きます）</li>
+      <li>ご注文は <b>3,300円（税込）</b> から承ります</li>
+      <li>配達料：<b>西区は無料</b>、そのほかの区は <b>500円（税込）</b></li></ul></div></details>
+    <details><summary>お支払い</summary><div class="body">
+      お支払い方法は、スタッフにお尋ねください。</div></details>`;
+}
+
+history.replaceState({step:0}, "");
+render(0);
+</script>
+</body>
+</html>
