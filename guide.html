@@ -211,7 +211,12 @@ function render(step){
 }
 
 function extras(){
-  return `<h2>そのほかのご案内</h2>
+  return `<h2>お店の情報</h2>
+    <div class="links">
+      <div class="link"><span class="ico">🕘</span><span><b>営業時間 9:15〜18:00</b><small>定休日：不定休</small></span></div>
+      <a class="link" href="tel:0116628125"><span class="ico">📞</span><span><b>011-662-8125</b><small>タップで電話がかかります</small></span></a>
+    </div>
+    <h2>そのほかのご案内</h2>
     <div class="links">
       <a class="link" href="./"><span class="ico">🌷</span><span><b>本日の切花価格</b><small>1本ずつ選ぶときの値段の目安</small></span></a>
       <a class="link" href="care.html"><span class="ico">🪴</span><span><b>鉢花の育て方</b><small>水やり・置き場所など</small></span></a>
@@ -226,7 +231,7 @@ function extras(){
       <li>水につかる部分の葉は取ります（水が傷みやすくなるため）</li>
       <li>暖房やエアコンの風・直射日光の当たらない、涼しい場所に</li></ul></div></details>
     <details><summary>ご予約</summary><div class="body"><ul>
-      <li>お電話・FAX・ご来店で承ります</li>
+      <li>お電話（<a href="tel:0116628125">011-662-8125</a>）・FAX・ご来店で承ります</li>
       <li>お供えや開店祝いなど、日にちが決まっているものは早めのご予約が安心です</li></ul></div></details>
     <details><summary>配達</summary><div class="body"><ul>
       <li>札幌市内へお届けします（定山渓は除きます）</li>
