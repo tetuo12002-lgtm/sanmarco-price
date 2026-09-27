@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f5d46">
+<title>鉢花の育て方</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --card:#ffffff; --ink:#1f2a24; --sub:#6b746e; --line:#e4e0d8;
+    --accent:#2f5d46;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141816; --card:#1d2320; --ink:#eef1ef; --sub:#9aa39d; --line:#2c3430; --accent:#8fc3a5; }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;scroll-padding-top:120px}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","BIZ UDPGothic","Yu Gothic UI","Meiryo",sans-serif;
+    line-height:1.6}
+  header{position:sticky;top:0;z-index:10;background:var(--accent);color:#fff;
+    padding:calc(10px + env(safe-area-inset-top)) 16px 0}
+  @media (prefers-color-scheme: dark){ header{color:#10160f} }
+  .shop{font-size:13px;opacity:.85;letter-spacing:.05em}
+  h1{margin:0;font-size:21px;font-weight:700}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 10px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;border-radius:999px;padding:5px 12px;font-size:13px;white-space:nowrap;
+    background:rgba(255,255,255,.18);color:inherit;text-decoration:none}
+  main{padding:8px 16px 40px;max-width:720px;margin:0 auto}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:16px}
+  .head{background:var(--c);color:#fff;padding:12px 16px}
+  .kind{font-size:12.5px;opacity:.95}
+  .head h2{margin:0;font-size:24px;letter-spacing:.04em}
+  .var{font-size:13px}
+  .badges{display:flex;gap:8px;padding:12px 14px 4px}
+  .badge{flex:1;border:1.5px solid var(--c);border-radius:10px;text-align:center;padding:4px 0;font-size:12px;color:var(--sub)}
+  .badge b{display:block;font-size:15px;color:var(--c)}
+  @media (prefers-color-scheme: dark){ .badge b{color:var(--ink)} }
+  dl{margin:0;padding:4px 16px 14px;font-size:15px}
+  dt{font-weight:700;color:var(--c);margin-top:10px}
+  @media (prefers-color-scheme: dark){ dt{color:var(--ink)} }
+  dt::before{content:"■ "}
+  dd{margin:0}
+  footer{text-align:center;font-size:11.5px;color:var(--sub);padding:0 16px 32px}
+</style>
+</head>
+<body>
+<header>
+  <div class="shop" id="shop"></div>
+  <h1>鉢花の育て方</h1>
+  <nav class="chips" id="chips"></nav>
+</header>
+<main id="list"></main>
+<footer>育て方は一般的な目安です。わからないことはお気軽にスタッフへお尋ねください。</footer>
+<script>
+const SHOP = "サンマルコ";
+const flowers = [
+  {
+    name: "カルーナ", kind: "ツツジ科・常緑低木（エリカの仲間）", var: "ダブル咲き（千重咲）ミックス",
+    color: "#a3487c", sun: "日なた", water: "やや多め", cold: "強い",
+    care: [
+      ["置き場所", "日当たりと風通しのよい屋外が好きです。蒸れに弱いので、株が混み合わない場所に置きます。"],
+      ["水やり", "土の表面が乾いたらたっぷり。根が細く乾燥に弱いので、水切れに注意します。"],
+      ["肥料", "春と秋に少量の緩効性肥料を。多すぎると根を傷めます。"],
+      ["お手入れ", "花が終わったら、枝先を軽く刈り込むと形よくまとまります。"],
+      ["冬越し", "寒さに強い植物です。鉢植えは冷たい風や凍結を避け、雪の当たらない軒下などへ。"],
+    ],
+  },
+  {
+    name: "カランコエ", kind: "ベンケイソウ科・多肉植物", var: "5号鉢",
+    color: "#d9544d", sun: "日なた", water: "少なめ", cold: "弱い",
+    care: [
+      ["置き場所", "日当たりのよい窓辺に。花が長く楽しめます。"],
+      ["水やり", "土がしっかり乾いてからたっぷり。多肉植物なので乾かし気味が基本です。冬はさらに控えめに。"],
+      ["肥料", "春〜秋の生育期に、薄めた液体肥料を月2回ほど。"],
+      ["お手入れ", "咲き終わった花は花茎ごと切ります。夜も明るい部屋だと次の花芽がつきにくいので、秋からは夜は暗い場所に。"],
+      ["冬越し", "5℃以下で傷みます。冬は室内の暖かい場所で。夜の窓際の冷え込みに注意。"],
+    ],
+  },
+  {
+    name: "カリガネソウ", kind: "シソ科・宿根草", var: "パピリオン（カリオプテリス）",
+    color: "#4f63b8", sun: "半日陰", water: "多め", cold: "強い",
+    care: [
+      ["置き場所", "明るい半日陰が向いています。夏の強い西日は避けます。"],
+      ["水やり", "乾燥が苦手です。土の表面が乾いたらたっぷりと。夏は水切れに注意。"],
+      ["肥料", "春と初夏に緩効性肥料を少量。"],
+      ["お手入れ", "チョウが舞うような青い花が咲きます。葉に触れると独特の香りがあります。"],
+      ["冬越し", "寒さに強い宿根草。冬は地上部が枯れるので根元で切り、春の芽吹きを待ちます。"],
+    ],
+  },
+  {
+    name: "キキョウ", kind: "キキョウ科・宿根草", var: "アストラブルー（背丈の低いタイプ）",
+    color: "#5b4fb0", sun: "日なた", water: "ふつう", cold: "強い",
+    care: [
+      ["置き場所", "日当たりと風通しのよい場所に。"],
+      ["水やり", "土の表面が乾いたらたっぷり。受け皿の水は捨てましょう。"],
+      ["肥料", "春〜初夏と花後に、緩効性肥料を少量。"],
+      ["お手入れ", "咲き終わった花は1輪ずつ摘みます。ひと通り咲いたら茎を半分ほどに切り戻すと、また花が咲きます。"],
+      ["冬越し", "寒さに強く、北海道でも庭で越冬できます。冬は地上部が枯れるので根元で切ります。"],
+    ],
+  },
+  {
+    name: "コスモス", kind: "キク科・一年草", var: "",
+    color: "#d8628f", sun: "日なた", water: "少なめ", cold: "霜に弱い",
+    care: [
+      ["置き場所", "日当たりと水はけのよい場所が大好きです。日陰だと花が少なくなります。"],
+      ["水やり", "土の表面が乾いたらたっぷり。過湿は苦手なので、やや乾かし気味に。"],
+      ["肥料", "ほとんど不要です。多すぎると葉ばかり茂り、倒れやすくなります。"],
+      ["お手入れ", "咲き終わった花を摘むと、次の花が咲きやすくなります。"],
+      ["冬越し", "一年草です。霜が降りると枯れるので、それまで花を楽しみましょう。"],
+    ],
+  },
+  {
+    name: "シクラメン", kind: "サクラソウ科・球根植物", var: "スーパーベラノ／ミニシクラメン マカロン",
+    color: "#c2305f", sun: "明るい室内", water: "ふつう", cold: "やや弱い",
+    care: [
+      ["置き場所", "明るく涼しい（10〜15℃くらい）窓辺に。暖房の風が直接当たる場所は避けます。"],
+      ["水やり", "土の表面が乾いたら、葉や球根にかけないよう株元へたっぷり。底面給水鉢は水を切らさないように。"],
+      ["肥料", "花が咲いている間は、薄めた液体肥料を月2〜3回。"],
+      ["お手入れ", "咲き終わった花や黄色い葉は、茎の付け根からねじるように引き抜きます。"],
+      ["冬越し", "5℃以下になると傷みます。夜の窓際は冷え込むので、部屋の内側へ移しましょう。"],
+    ],
+  },
+  {
+    name: "ビオラ", kind: "スミレ科・一年草", var: "",
+    color: "#7a4bb3", sun: "日なた", water: "ふつう", cold: "強い",
+    care: [
+      ["置き場所", "日当たりのよい屋外に。日が足りないとひょろひょろ伸びます。"],
+      ["水やり", "土の表面が乾いたらたっぷり。"],
+      ["肥料", "花が次々咲くので、薄めた液体肥料を月2〜3回。"],
+      ["お手入れ", "咲き終わった花は花茎ごと摘みます。伸びすぎたら半分ほどに切り戻すとまた茂ります。"],
+      ["冬越し", "寒さに強く、雪の下で冬を越して春にまた咲くこともあります。"],
+    ],
+  },
+  {
+    name: "胡蝶蘭", kind: "ラン科・ファレノプシス", var: "ミヤカグラ",
+    color: "#b0457e", sun: "レース越し", water: "少なめ", cold: "弱い",
+    care: [
+      ["置き場所", "レースのカーテン越しの明るい室内に。直射日光は葉焼けします。15℃以上が理想です。"],
+      ["水やり", "植え込み材（水ごけ）が乾いたらたっぷり。受け皿の水は必ず捨てます。冬は控えめに。"],
+      ["肥料", "花が咲いている間は不要です。春〜秋に薄い液体肥料を。"],
+      ["お手入れ", "ラッピングは蒸れるので早めに外します。花が終わったら花茎を下から2〜3節残して切ると、再び咲くことも。"],
+      ["冬越し", "寒さに弱く、10℃以下は危険です。夜は窓際から部屋の中央へ移しましょう。"],
+    ],
+  },
+  {
+    name: "ペンタス", kind: "アカネ科・多年草", var: "グラフィティ",
+    color: "#d2466a", sun: "日なた", water: "ふつう", cold: "弱い",
+    care: [
+      ["置き場所", "日当たりのよい場所に。星形の小さな花がたくさん咲きます。"],
+      ["水やり", "土の表面が乾いたらたっぷり。"],
+      ["肥料", "花が咲いている間は、薄めた液体肥料を月2回ほど。"],
+      ["お手入れ", "咲き終わった花房は、すぐ下の葉の上で切ると次の花が上がってきます。"],
+      ["冬越し", "寒さに弱く、10℃を下回る前に室内の日当たりのよい窓辺へ入れます。"],
+    ],
+  },
+  {
+    name: "リンドウ", kind: "リンドウ科・宿根草", var: "あしろブーケ（アクア・マリン・ロゼ・マリアージュ）",
+    color: "#2f5ea8", sun: "日なた", water: "多め", cold: "強い",
+    care: [
+      ["置き場所", "日当たりのよい屋外に。花は日が当たると開き、暗いと閉じます。室内なら明るい窓辺に。"],
+      ["水やり", "水切れが苦手です。土の表面が乾き始めたらたっぷり。乾くと下葉が枯れてしまいます。"],
+      ["肥料", "春〜秋に緩効性肥料を少量。"],
+      ["お手入れ", "咲き終わった花は摘み取ります。"],
+      ["冬越し", "寒さに強い宿根草。地上部が枯れたら根元で切り、鉢は凍りすぎない場所で冬越しさせます。春にまた芽が出ます。"],
+    ],
+  },
+];
+
+document.getElementById("shop").textContent = SHOP;
+document.title = SHOP + " 鉢花の育て方";
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+document.getElementById("chips").innerHTML = flowers.map((f, i) => `<a class="chip" href="#f${i}">${esc(f.name)}</a>`).join("");
+document.getElementById("list").innerHTML = flowers.map((f, i) => `
+  <article class="card" id="f${i}" style="--c:${f.color}">
+    <div class="head">
+      <div class="kind">${esc(f.kind)}</div>
+      <h2>${esc(f.name)}</h2>
+      ${f.var ? `<div class="var">${esc(f.var)}</div>` : ""}
+    </div>
+    <div class="badges">
+      <div class="badge">日当たり<b>${esc(f.sun)}</b></div>
+      <div class="badge">水やり<b>${esc(f.water)}</b></div>
+      <div class="badge">寒さ<b>${esc(f.cold)}</b></div>
+    </div>
+    <dl>${f.care.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+  </article>`).join("");
+</script>
+</body>
+</html>
