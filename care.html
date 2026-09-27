@@ -57,7 +57,7 @@
 const SHOP = "サンマルコ";
 const flowers = [
   {
-    name: "カルーナ", kind: "ツツジ科・常緑低木（エリカの仲間）", var: "ダブル咲き（千重咲）ミックス",
+    id: "calluna", name: "カルーナ", kind: "ツツジ科・常緑低木（エリカの仲間）", var: "ダブル咲き（千重咲）ミックス",
     color: "#a3487c", sun: "日なた", water: "やや多め", cold: "強い",
     care: [
       ["置き場所", "日当たりと風通しのよい屋外が好きです。蒸れに弱いので、株が混み合わない場所に置きます。"],
@@ -68,7 +68,7 @@ const flowers = [
     ],
   },
   {
-    name: "カランコエ", kind: "ベンケイソウ科・多肉植物", var: "5号鉢",
+    id: "kalanchoe", name: "カランコエ", kind: "ベンケイソウ科・多肉植物", var: "5号鉢",
     color: "#d9544d", sun: "日なた", water: "少なめ", cold: "弱い",
     care: [
       ["置き場所", "日当たりのよい窓辺に。花が長く楽しめます。"],
@@ -79,7 +79,7 @@ const flowers = [
     ],
   },
   {
-    name: "カリガネソウ", kind: "シソ科・宿根草", var: "パピリオン（カリオプテリス）",
+    id: "karigane", name: "カリガネソウ", kind: "シソ科・宿根草", var: "パピリオン（カリオプテリス）",
     color: "#4f63b8", sun: "半日陰", water: "多め", cold: "強い",
     care: [
       ["置き場所", "明るい半日陰が向いています。夏の強い西日は避けます。"],
@@ -90,7 +90,7 @@ const flowers = [
     ],
   },
   {
-    name: "キキョウ", kind: "キキョウ科・宿根草", var: "アストラブルー（背丈の低いタイプ）",
+    id: "kikyo", name: "キキョウ", kind: "キキョウ科・宿根草", var: "アストラブルー（背丈の低いタイプ）",
     color: "#5b4fb0", sun: "日なた", water: "ふつう", cold: "強い",
     care: [
       ["置き場所", "日当たりと風通しのよい場所に。"],
@@ -101,7 +101,7 @@ const flowers = [
     ],
   },
   {
-    name: "コスモス", kind: "キク科・一年草", var: "",
+    id: "cosmos", name: "コスモス", kind: "キク科・一年草", var: "",
     color: "#d8628f", sun: "日なた", water: "少なめ", cold: "霜に弱い",
     care: [
       ["置き場所", "日当たりと水はけのよい場所が大好きです。日陰だと花が少なくなります。"],
@@ -112,7 +112,7 @@ const flowers = [
     ],
   },
   {
-    name: "シクラメン", kind: "サクラソウ科・球根植物", var: "スーパーベラノ／ミニシクラメン マカロン",
+    id: "cyclamen", name: "シクラメン", kind: "サクラソウ科・球根植物", var: "スーパーベラノ／ミニシクラメン マカロン",
     color: "#c2305f", sun: "明るい室内", water: "ふつう", cold: "やや弱い",
     care: [
       ["置き場所", "明るく涼しい（10〜15℃くらい）窓辺に。暖房の風が直接当たる場所は避けます。"],
@@ -123,7 +123,7 @@ const flowers = [
     ],
   },
   {
-    name: "ビオラ", kind: "スミレ科・一年草", var: "",
+    id: "viola", name: "ビオラ", kind: "スミレ科・一年草", var: "",
     color: "#7a4bb3", sun: "日なた", water: "ふつう", cold: "強い",
     care: [
       ["置き場所", "日当たりのよい屋外に。日が足りないとひょろひょろ伸びます。"],
@@ -134,7 +134,7 @@ const flowers = [
     ],
   },
   {
-    name: "胡蝶蘭", kind: "ラン科・ファレノプシス", var: "ミヤカグラ",
+    id: "kochoran", name: "胡蝶蘭", kind: "ラン科・ファレノプシス", var: "ミヤカグラ",
     color: "#b0457e", sun: "レース越し", water: "少なめ", cold: "弱い",
     care: [
       ["置き場所", "レースのカーテン越しの明るい室内に。直射日光は葉焼けします。15℃以上が理想です。"],
@@ -145,7 +145,7 @@ const flowers = [
     ],
   },
   {
-    name: "ペンタス", kind: "アカネ科・多年草", var: "グラフィティ",
+    id: "pentas", name: "ペンタス", kind: "アカネ科・多年草", var: "グラフィティ",
     color: "#d2466a", sun: "日なた", water: "ふつう", cold: "弱い",
     care: [
       ["置き場所", "日当たりのよい場所に。星形の小さな花がたくさん咲きます。"],
@@ -156,7 +156,7 @@ const flowers = [
     ],
   },
   {
-    name: "リンドウ", kind: "リンドウ科・宿根草", var: "あしろブーケ（アクア・マリン・ロゼ・マリアージュ）",
+    id: "rindo", name: "リンドウ", kind: "リンドウ科・宿根草", var: "あしろブーケ（アクア・マリン・ロゼ・マリアージュ）",
     color: "#2f5ea8", sun: "日なた", water: "多め", cold: "強い",
     care: [
       ["置き場所", "日当たりのよい屋外に。花は日が当たると開き、暗いと閉じます。室内なら明るい窓辺に。"],
@@ -171,9 +171,15 @@ const flowers = [
 document.getElementById("shop").textContent = SHOP;
 document.title = SHOP + " 鉢花の育て方";
 const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-document.getElementById("chips").innerHTML = flowers.map((f, i) => `<a class="chip" href="#f${i}">${esc(f.name)}</a>`).join("");
-document.getElementById("list").innerHTML = flowers.map((f, i) => `
-  <article class="card" id="f${i}" style="--c:${f.color}">
+// ?id=rindo のように指定されたら、その花のカードだけを表示する（商品ごとのQR用）
+const only = flowers.find(f => f.id === new URLSearchParams(location.search).get("id"));
+const shown = only ? [only] : flowers;
+if (only) document.title = SHOP + " " + only.name + "の育て方";
+document.getElementById("chips").innerHTML = only
+  ? `<a class="chip" href="care.html">ほかの花の育て方も見る</a>`
+  : flowers.map(f => `<a class="chip" href="#${f.id}">${esc(f.name)}</a>`).join("");
+document.getElementById("list").innerHTML = shown.map(f => `
+  <article class="card" id="${f.id}" style="--c:${f.color}">
     <div class="head">
       <div class="kind">${esc(f.kind)}</div>
       <h2>${esc(f.name)}</h2>
