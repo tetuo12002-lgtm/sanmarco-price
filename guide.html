@@ -35,6 +35,9 @@
     background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer}
   .opt:active{transform:scale(.99)}
   .opt .ico{font-size:28px;flex:none;width:36px;text-align:center}
+  .opt .pic{flex:none;width:76px;height:76px;border-radius:12px;background:var(--accent-soft);
+    display:flex;align-items:center;justify-content:center;font-size:34px}
+  .opt .pic svg{width:72px;height:72px;display:block}
   .opt b{display:block;font-size:17px}
   .opt small{display:block;font-size:13px;color:var(--sub)}
   .opt .tag{margin-left:auto;flex:none;font-size:11.5px;font-weight:700;color:var(--mark);
@@ -42,6 +45,18 @@
   .grid2{grid-template-columns:1fr 1fr}
   .grid2 .opt{justify-content:center;text-align:center;flex-direction:column;gap:2px;padding:14px 8px}
   .grid2 .opt .tag{margin:4px 0 0}
+  .opt .cam{font-size:12px;color:var(--accent);font-weight:700;margin-top:2px}
+  /* 参考写真 */
+  .sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}
+  .sheet-in{background:var(--bg);width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;
+    padding:18px 16px calc(16px + env(safe-area-inset-bottom))}
+  .sheet-in > b{display:block;font-size:18px;margin-bottom:10px}
+  .sheet-in small{display:block;font-size:13px;color:var(--sub);margin-top:6px}
+  .photos{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory}
+  .photos img{flex:none;width:100%;max-height:60vh;object-fit:contain;background:var(--card);border-radius:12px;scroll-snap-align:center}
+  .ref{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;text-align:center}
+  .ref img{max-width:100%;max-height:220px;border-radius:10px}
+  .ref small{display:block;font-size:12px;color:var(--sub)}
   .back{margin-top:16px;background:none;border:0;color:var(--sub);font:inherit;font-size:14px;padding:8px 0;cursor:pointer}
   .note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px;margin-top:14px}
   .note b{display:block;margin-bottom:2px}
@@ -79,6 +94,7 @@
 </header>
 <main id="app"></main>
 <footer>わからないことは、お気軽にスタッフへお声がけください。</footer>
+<script src="photos.js"></script>
 <script>
 const SHOP = "サンマルコ";
 document.getElementById("shop").textContent = SHOP;
@@ -99,6 +115,54 @@ const STYLES = {
   butsuka:  {ico:"🪷", name:"仏花（1対）", sub:"お墓・お仏壇に左右一対で供える束"},
   hachi:    {ico:"🪴", name:"鉢花",       sub:"根があるので長く楽しめます"},
   omakase:  {ico:"🙋", name:"決まっていない", sub:"スタッフと相談して決めます"},
+};
+
+/* 形のイメージ図（お店の写真ができたら差し替え） */
+const LEAF = "#5f9a6c", STEM = "#4f7f5a";
+function fl(x, y, r, c){
+  let s = "";
+  for(let i = 0; i < 5; i++){ const a = (i*72 - 90) * Math.PI / 180;
+    s += `<circle cx="${(x + r*.62*Math.cos(a)).toFixed(1)}" cy="${(y + r*.62*Math.sin(a)).toFixed(1)}" r="${(r*.5).toFixed(1)}" fill="${c}"/>`; }
+  return s + `<circle cx="${x}" cy="${y}" r="${(r*.32).toFixed(1)}" fill="#f2c14e"/>`;
+}
+function kiku(x, y, r, c){
+  let s = "";
+  for(let i = 0; i < 12; i++) s += `<ellipse cx="${x}" cy="${y - r*.55}" rx="${(r*.2).toFixed(1)}" ry="${(r*.5).toFixed(1)}" fill="${c}" transform="rotate(${i*30} ${x} ${y})"/>`;
+  return s + `<circle cx="${x}" cy="${y}" r="${(r*.3).toFixed(1)}" fill="${c}" stroke="rgba(0,0,0,.15)"/>`;
+}
+function leaf(x, y, rot, l = 9){
+  return `<ellipse cx="${x}" cy="${y}" rx="${(l*.38).toFixed(1)}" ry="${l}" fill="${LEAF}" transform="rotate(${rot} ${x} ${y})"/>`;
+}
+function butsuBunch(cx){
+  return `<g stroke="${STEM}" stroke-width="1.4">${[-6,-3,0,3,6].map(d => `<line x1="${cx+d}" y1="30" x2="${cx+d/3}" y2="72"/>`).join("")}</g>
+    ${leaf(cx-9,34,-35,8)}${leaf(cx+9,34,35,8)}${leaf(cx-7,46,-25,7)}${leaf(cx+7,46,25,7)}
+    ${kiku(cx,12,7,"#f3f0e6")}${kiku(cx-7,24,7,"#f2c14e")}${kiku(cx+7,24,7,"#b07cc6")}${kiku(cx,34,7,"#e0707a")}
+    <rect x="${cx-5}" y="58" width="10" height="5" rx="1.5" fill="#9a7b4f"/>`;
+}
+const PICS = {
+  hanataba: `<svg viewBox="0 0 80 80" aria-hidden="true">
+    ${leaf(22,30,-40)}${leaf(58,28,40)}${leaf(40,20,0,8)}
+    ${fl(28,26,9,"#e8768a")}${fl(47,19,10,"#f2a65a")}${fl(56,33,8,"#b07cc6")}${fl(38,34,8,"#f7d0d8")}${fl(21,40,7,"#e8768a")}
+    <path d="M14 38 L66 38 L45 74 L35 74 Z" fill="#f1e4cf" stroke="#cdb896" stroke-width="1.2"/>
+    <path d="M20 38 L40 38 L38 74 L35 74 Z" fill="#f5cdd3" opacity=".85"/>
+    <path d="M40 58 L30 52 L30 64 Z M40 58 L50 52 L50 64 Z" fill="#b23a48"/><circle cx="40" cy="58" r="3" fill="#8f2a37"/>
+  </svg>`,
+  arrange: `<svg viewBox="0 0 80 80" aria-hidden="true">
+    <path d="M16 50 Q40 2 64 50" fill="none" stroke="#a6763f" stroke-width="3.5" stroke-linecap="round"/>
+    ${leaf(15,44,-60)}${leaf(65,44,60)}${leaf(40,34,0,8)}
+    ${fl(24,42,8,"#e8768a")}${fl(40,36,9,"#f2a65a")}${fl(56,42,8,"#b07cc6")}${fl(32,47,6,"#f7d0d8")}${fl(48,47,6,"#f7d0d8")}
+    <path d="M12 50 L68 50 L61 74 L19 74 Z" fill="#c8965a"/>
+    <g stroke="#a6763f" stroke-width="1.3"><line x1="14" y1="57" x2="66" y2="57"/><line x1="16" y1="64" x2="64" y2="64"/><line x1="18" y1="70" x2="62" y2="70"/></g>
+    <rect x="10" y="48" width="60" height="5" rx="2.5" fill="#a6763f"/>
+  </svg>`,
+  butsuka: `<svg viewBox="0 0 80 80" aria-hidden="true">${butsuBunch(22)}${butsuBunch(58)}</svg>`,
+  hachi: `<svg viewBox="0 0 80 80" aria-hidden="true">
+    <g stroke="${STEM}" stroke-width="1.6"><line x1="40" y1="46" x2="30" y2="22"/><line x1="40" y1="46" x2="42" y2="16"/><line x1="40" y1="46" x2="53" y2="24"/></g>
+    ${leaf(28,40,-55,10)}${leaf(52,40,55,10)}${leaf(34,34,-25,8)}${leaf(47,33,25,8)}
+    ${fl(30,22,8,"#e0566b")}${fl(42,15,8,"#e0566b")}${fl(53,24,8,"#e0566b")}
+    <path d="M24 50 L56 50 L51 74 L29 74 Z" fill="#c96f4a"/>
+    <rect x="21" y="46" width="38" height="7" rx="2" fill="#b35d3b"/>
+  </svg>`,
 };
 const STYLE_BY_PURPOSE = {
   oiwai:  ["hanataba","arrange","hachi","omakase"],
@@ -154,7 +218,30 @@ window.addEventListener("popstate", e => {
 function back(){ history.back(); }
 const pName = () => PURPOSES.find(x => x.id===state.p).name;
 
+/* 参考写真（photos.js に登録したものだけ表示） */
+const PHOTOS = window.PHOTOS || {};
+function photosFor(b){
+  return PHOTOS[`${state.p}-${state.s}-${b}`] || PHOTOS[`${state.s}-${b}`] || [];
+}
+function pickBudget(b){
+  const ps = photosFor(b);
+  if(!ps.length){ state.b = b; go(4); return; }
+  const box = document.createElement("div");
+  box.className = "sheet";
+  box.onclick = e => { if(e.target === box) closeSheet(); };
+  box.innerHTML = `<div class="sheet-in">
+    <b>${yen(b)}の${esc(STYLES[state.s].name)}の例</b>
+    <div class="photos">${ps.map(f => `<img src="photos/${esc(f)}" alt="${yen(b)}の${esc(STYLES[state.s].name)}の参考写真" loading="lazy">`).join("")}</div>
+    ${ps.length > 1 ? `<small>横にずらすと、ほかの写真も見られます</small>` : ""}
+    <small>サンマルコでお作りしたものです。季節や入荷によって、花の種類や色は変わります。</small>
+    <button class="primary" onclick="closeSheet();state.b=${b};go(4)">この金額にする</button>
+    <button class="back" onclick="closeSheet()">← ほかの金額を見る</button></div>`;
+  document.body.appendChild(box);
+}
+function closeSheet(){ document.querySelectorAll(".sheet").forEach(x => x.remove()); }
+
 function render(step){
+  closeSheet();
   steps(step);
   window.scrollTo(0,0);
   if(step===0){
@@ -176,7 +263,7 @@ function render(step){
   if(step===2){
     app.innerHTML = `<h2>② どんな形にしますか？</h2><p class="hint">${esc(pName())}には、こんな形があります。</p>
       <div class="opts">${STYLE_BY_PURPOSE[state.p].map(k => { const x = STYLES[k]; return `
-        <button class="opt" onclick="state.s='${k}';go(3)"><span class="ico">${x.ico}</span>
+        <button class="opt" onclick="state.s='${k}';go(3)"><span class="pic">${PICS[k]||x.ico}</span>
         <span><b>${x.name}</b><small>${x.sub}</small></span></button>`; }).join("")}</div>
       <button class="back" onclick="back()">← もどる</button>`;
     return;
@@ -186,7 +273,7 @@ function render(step){
     const list = state.p==="sonae" ? BUDGETS.filter(b => b>=2000 && b<=20000) : BUDGETS;
     app.innerHTML = `<h2>③ ご予算は？</h2><p class="hint">${budgetRange(state.p)}<br>金額に合わせてお作りします（税込）。</p>
       <div class="opts grid2">${list.map(b => `
-        <button class="opt" onclick="state.b=${b};go(4)"><b>${yen(b)}</b>${pop.includes(b)?'<span class="tag">よく選ばれる</span>':""}</button>`).join("")}
+        <button class="opt" onclick="pickBudget(${b})"><b>${yen(b)}</b>${pop.includes(b)?'<span class="tag">よく選ばれる</span>':""}${photosFor(b).length?'<span class="cam">📷 写真あり</span>':""}</button>`).join("")}
         <button class="opt" onclick="state.b='相談';go(4)"><b>相談したい</b></button></div>
       <button class="back" onclick="back()">← もどる</button>`;
     return;
@@ -207,7 +294,8 @@ function render(step){
         <tr><th>用途</th><td>${esc(pName())}</td></tr>
         <tr><th>形</th><td>${esc(STYLES[state.s].name)}</td></tr>
         <tr><th>ご予算</th><td>${typeof state.b==="number" ? yen(state.b)+"くらい" : "相談したい"}</td></tr>
-        <tr><th>色</th><td>${esc(cs[state.c])}</td></tr></table></div>
+        <tr><th>色</th><td>${esc(cs[state.c])}</td></tr></table>
+        ${typeof state.b==="number" && photosFor(state.b).length ? `<div class="ref"><img src="photos/${esc(photosFor(state.b)[0])}" alt="参考写真"><small>参考にした写真</small></div>` : ""}</div>
       ${notes.length ? `<div class="note"><b>${esc(pName())}で知っておくと安心なこと</b><ul>${notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${STYLES[state.s].wait ? `<div class="note wait"><b>⏱ お作りするのに ${STYLES[state.s].wait} かかります</b>ご注文をいただいてから1つずつお作りします。ご注文が混み合っているときは、もう少しお時間をいただく場合があります。お急ぎのときは、先にお電話（<a href="tel:0116628125">011-662-8125</a>）でご予約いただくと、待たずにお受け取りいただけます。</div>` : ""}
       <button class="primary" onclick="history.go(-5)">最初からやり直す</button>
