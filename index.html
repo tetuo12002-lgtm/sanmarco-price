@@ -4,15 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2f5d46">
-<title>切花価格表</title>
+<title>本日の切花</title>
 <style>
   :root{
     --bg:#f6f4ef; --card:#ffffff; --ink:#1f2a24; --sub:#6b746e; --line:#e4e0d8;
-    --accent:#2f5d46; --accent-soft:#e3ece6; --price:#b23a48;
+    --accent:#2f5d46; --accent-soft:#e3ece6;
   }
   @media (prefers-color-scheme: dark){
     :root{ --bg:#141816; --card:#1d2320; --ink:#eef1ef; --sub:#9aa39d; --line:#2c3430;
-      --accent:#8fc3a5; --accent-soft:#24312a; --price:#ff8a96; }
+      --accent:#8fc3a5; --accent-soft:#24312a; }
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
@@ -47,9 +47,6 @@
   .name{font-size:16px;font-weight:600;overflow-wrap:anywhere}
   .meta{font-size:12.5px;color:var(--sub);margin-top:2px;display:flex;flex-wrap:wrap;gap:4px 10px}
   .color{display:inline-block;background:var(--accent-soft);color:var(--ink);border-radius:6px;padding:0 6px}
-  .price{text-align:right;flex:none}
-  .yen{font-size:20px;font-weight:700;color:var(--price);font-variant-numeric:tabular-nums}
-  .unit{font-size:11px;color:var(--sub)}
   .empty{text-align:center;color:var(--sub);padding:40px 0}
   footer{text-align:center;font-size:11.5px;color:var(--sub);padding:0 16px 32px}
 </style>
@@ -57,7 +54,7 @@
 <body>
 <header id="hd">
   <div class="shop" id="shop"></div>
-  <h1>本日の切花価格</h1>
+  <h1>本日の切花</h1>
   <div class="updated" id="updated">読み込み中…</div>
 </header>
 <div class="tools" id="tools">
@@ -69,17 +66,16 @@
   <div class="chips" id="chips"></div>
 </div>
 <main id="list"></main>
-<footer>価格はすべて税込です。入荷状況により売り切れの場合がございます。</footer>
+<footer>入荷状況により売り切れの場合がございます。</footer>
 
 <script>
 (function(){
   var SHOP = "サンマルコ";
   document.getElementById("shop").textContent = SHOP;
-  document.title = SHOP + " 切花価格表";
+  document.title = SHOP + " 本日の切花";
 
   var state = { q: "", cat: "" }, data = null;
   var $ = function(id){ return document.getElementById(id); };
-  var yen = function(n){ return "¥" + Number(n).toLocaleString("ja-JP"); };
   var norm = function(s){ return (s || "").normalize("NFKC").toLowerCase()
     .replace(/[ァ-ヶ]/g, function(c){ return String.fromCharCode(c.charCodeAt(0) - 0x60); }); };
 
@@ -90,7 +86,7 @@
     var groups = [], map = {};
     var q = norm(state.q);
     data.items.forEach(function(it){
-      // it = [品名, 品種, 色, 産地, 単位, 税別, 税込]
+      // it = [品名, 品種, 色, 産地]（価格は載せない）
       if (state.cat && it[0] !== state.cat) return;
       if (q && norm(it.slice(0,4).join(" ")).indexOf(q) < 0) return;
       if (!map[it[0]]) { map[it[0]] = []; groups.push(it[0]); }
@@ -103,8 +99,7 @@
           if (it[2]) meta.push('<span class="color">' + esc(it[2]) + '</span>');
           if (it[3]) meta.push('<span>' + esc(it[3]) + '産</span>');
           return '<div class="row"><div class="info"><div class="name">' + esc(it[1] || it[0]) + '</div>' +
-            (meta.length ? '<div class="meta">' + meta.join("") + '</div>' : '') + '</div>' +
-            '<div class="price"><div class="yen">' + yen(it[6]) + '</div><div class="unit">' + esc(it[4]) + ' 税込</div></div></div>';
+            (meta.length ? '<div class="meta">' + meta.join("") + '</div>' : '') + '</div></div>';
         }).join("") + '</div></section>';
     }).join("");
     $("list").innerHTML = html || '<div class="empty">該当する花が見つかりません</div>';
