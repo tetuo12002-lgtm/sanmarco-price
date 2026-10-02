@@ -102,11 +102,87 @@ document.getElementById("shop").textContent = SHOP;
 /* 用途 */
 const PURPOSES = [
   {id:"oiwai",  ico:"🎉", name:"お祝い",       sub:"誕生日・開店・退職・発表会など"},
-  {id:"gift",   ico:"🎁", name:"プレゼント",   sub:"母の日・記念日・ちょっとしたお礼"},
+  {id:"gift",   ico:"🎁", name:"プレゼント",   sub:"母の日・敬老の日・記念日・プロポーズ・お礼"},
   {id:"sonae",  ico:"🕊️", name:"お供え",       sub:"ご葬儀・法要・お墓・お仏壇"},
   {id:"mimai",  ico:"💐", name:"お見舞い",     sub:"入院・療養中の方へ"},
   {id:"jitaku", ico:"🏠", name:"自宅に飾る",   sub:"自分用・お部屋用"},
 ];
+
+/* 場面（用途ごと）
+   rec=おすすめの形（先頭に並べて「おすすめ」を付ける）、colors=色の選択肢（なければ用途の標準）、tips=この場面のポイント */
+const SCENES = {
+  oiwai: [
+    {id:"tanjou",  ico:"🎂", name:"誕生日",                 sub:"家族・友人・恋人へ", rec:["hanataba","arrange"],
+      tips:["年齢の数のバラなど、本数で気持ちを込めることもできます","メッセージカードもご用意できます"]},
+    {id:"choju",   ico:"🎎", name:"長寿のお祝い",           sub:"還暦・古希・喜寿・傘寿・米寿など。お孫さんからも", rec:["arrange","hachi","hanataba"],
+      colors:["おまかせ","赤（還暦）","紫（古希・喜寿・卒寿）","黄・金色（傘寿・米寿）","白（白寿）","ご本人の好きな色で"],
+      tips:["お祝いの年ごとに、ゆかりの色があります（還暦は赤、古希・喜寿は紫、米寿は黄・金色など）","ご年配の方には、花瓶のいらないアレンジや、長く楽しめる鉢花が喜ばれます","お孫さんのお名前入りのメッセージカードもご用意できます"]},
+    {id:"kaiten",  ico:"🏪", name:"開店・開業・移転",       sub:"お店・会社・事務所へ", rec:["arrange","hachi"],
+      tips:["名札（立札）を付けられます。贈り主とお相手のお名前をお伝えください","「赤」は「赤字」を連想するので、開店祝いでは控えめにするのが一般的です","オープン前日か当日の午前中に届くと喜ばれます。配達もできます"]},
+    {id:"taishoku",ico:"🙇", name:"退職・送別・異動",       sub:"職場で渡す", rec:["hanataba"],
+      tips:["持ち帰りやすい大きさにすると、電車やバスの方も安心です","渡すまで時間があるときは、水を含ませてお包みします"]},
+    {id:"happyou", ico:"🎹", name:"発表会・演奏会・舞台",   sub:"ピアノ・バレエ・ダンス・楽屋へ", rec:["hanataba","arrange"],
+      tips:["衣装や会場の雰囲気に合わせた色もおすすめです","楽屋に届けるなら、そのまま飾れるアレンジが便利です"]},
+    {id:"kekkon",  ico:"💍", name:"結婚のお祝い",           sub:"ご結婚・結婚式・披露宴", rec:["arrange","hanataba"],
+      tips:["白やピンクなど、やわらかい色が人気です","式場へ届ける場合は、会場の受け取り時間をご確認ください"]},
+    {id:"shussan", ico:"👶", name:"出産のお祝い",           sub:"赤ちゃんが生まれた方へ", rec:["arrange"],
+      tips:["香りの強い花・花粉が落ちる花は控えめにします","産院によっては生花を持ち込めないことがあります。事前にご確認ください","男の子は青や黄、女の子はピンク系を選ぶ方も多いです"]},
+    {id:"nyugaku", ico:"🌸", name:"入学・卒業・合格",       sub:"卒業式・卒園式・合格祝い", rec:["hanataba"],
+      tips:["式の当日は混み合います。早めのご予約が安心です","小さな花束をいくつか、というご注文もできます"]},
+    {id:"shoshin", ico:"📈", name:"昇進・就任・受賞",       sub:"お取引先・上司へ", rec:["arrange","hachi"],
+      tips:["名札（立札）を付けられます","会社へ届ける場合は、受け取れる時間帯をご確認ください"]},
+  ],
+  gift: [
+    {id:"mago",    ico:"👴", name:"孫からおじいちゃん・おばあちゃんへ", sub:"敬老の日・誕生日・ありがとうの気持ち", rec:["arrange","hachi","hanataba"],
+      tips:["花瓶がいらないアレンジや、長く楽しめる鉢花が喜ばれます","お孫さんのお名前入りのメッセージカードもご用意できます","お子さんのおこづかいの範囲でもお作りします。ご予算をお伝えください"]},
+    {id:"propose", ico:"💍", name:"プロポーズ・告白",       sub:"大切な人に気持ちを伝える", rec:["hanataba"],
+      colors:["赤いバラ","ピンク系","白系","相手の好きな色で","おまかせ"],
+      tips:["バラは本数にも意味があります（1本「あなたしかいない」、3本「愛しています」、12本「ダズンローズ」、108本「結婚してください」など）","本数が多いときは入荷の都合があるので、早めにご相談ください","渡す時間に合わせてお受け取りの時間を決められます。持ち歩く時間が長いときはお伝えください"]},
+    {id:"kinenbi", ico:"💑", name:"結婚記念日・記念日",     sub:"夫婦・恋人へ", rec:["hanataba","arrange"],
+      tips:["結婚した年数の本数のバラなども人気です","メッセージカードもご用意できます"]},
+    {id:"hahanohi",ico:"🌹", name:"母の日",                 sub:"カーネーションなど", rec:["hanataba","arrange","hachi"],
+      tips:["母の日の前は大変混み合います。早めのご予約が安心です","カーネーション以外の花でもお作りできます"]},
+    {id:"chichi",  ico:"👔", name:"父の日",                 sub:"黄色いバラなど", rec:["hanataba","arrange","hachi"],
+      tips:["父の日は黄色い花が定番です","花だけでなく、観葉植物や鉢物も人気です"]},
+    {id:"orei",    ico:"🙏", name:"お礼・手みやげ",         sub:"お世話になった方へ・訪問先へ", rec:["hanataba","arrange"],
+      tips:["訪問先には、花瓶のいらないアレンジが気をつかわせません","メッセージカードもご用意できます"]},
+  ],
+  sonae: [
+    {id:"sougi",   ico:"🕯️", name:"ご葬儀（通夜・告別式）", sub:"斎場・ご自宅へ", rec:["arrange"],
+      colors:["おまかせ","白・グリーン中心","白に淡い色を少し"],
+      tips:["名札（立札）を付けられます。贈り主のお名前をお伝えください","斎場へ届ける場合は、斎場名・故人のお名前・日時をお知らせください"]},
+    {id:"houyou",  ico:"📿", name:"四十九日・一周忌などの法要", sub:"お寺・ご自宅へ", rec:["arrange","hanataba"],
+      tips:["四十九日を過ぎたら、淡い色を入れることもあります","故人の好きだった花や色でお作りすることもできます"]},
+    {id:"ohaka",   ico:"🪦", name:"お墓参り・お盆・お彼岸", sub:"お墓に供える", rec:["butsuka"],
+      tips:["お墓用は左右一対（2束）でご用意するのが一般的です","お盆・お彼岸の前は混み合います。早めのご予約が安心です"]},
+    {id:"butsudan",ico:"🏯", name:"お仏壇・月命日",         sub:"ご自宅のお仏壇に", rec:["butsuka","arrange"],
+      tips:["お仏壇の大きさに合わせて長さを調整します。だいたいの高さをお伝えください"]},
+    {id:"okuyami", ico:"✉️", name:"後日のお悔やみ",         sub:"ご葬儀に行けなかったとき、ご自宅へ", rec:["arrange"],
+      tips:["花瓶がいらないアレンジが、ご遺族の手をわずらわせません","メッセージカードも付けられます"]},
+    {id:"pet",     ico:"🐾", name:"ペットのお供え",         sub:"家族だったペットへ", rec:["arrange","hanataba"],
+      colors:["おまかせ","白・グリーン中心","明るくやさしい色","その子のイメージの色で"],
+      tips:["ペットのお供えは、明るくかわいらしい色にされる方も多いです"]},
+  ],
+  mimai: [
+    {id:"nyuin",   ico:"🏥", name:"入院中の方へ",           sub:"病院へ持っていく", rec:["arrange"],
+      tips:["病院によっては生花を持ち込めないことがあります。事前にご確認ください"]},
+    {id:"ryouyou", ico:"🛋️", name:"ご自宅で療養中の方へ",   sub:"ご自宅へ持っていく・届ける", rec:["arrange","hanataba"],
+      tips:["お世話の手間がかからないアレンジがおすすめです"]},
+    {id:"shisetsu",ico:"🏡", name:"施設にいる方へ",         sub:"老人ホーム・介護施設などへ", rec:["arrange"],
+      tips:["施設によっては生花の持ち込みに決まりがあります。事前にご確認ください","小さめのアレンジだと置き場所に困りません"]},
+  ],
+  jitaku: [
+    {id:"heya",    ico:"🛋️", name:"リビング・お部屋に",     sub:"ふだんの暮らしに", rec:["hanataba","hachi"],
+      tips:["1本からでも選べます。ご予算だけ伝えていただいてもまとめます"]},
+    {id:"genkan",  ico:"🚪", name:"玄関・お店のカウンターに", sub:"お客さまを迎える場所に", rec:["arrange","hachi"],
+      tips:["置く場所の大きさをお伝えいただくと、ちょうどいいサイズでお作りします"]},
+    {id:"party",   ico:"🥂", name:"来客・ホームパーティー", sub:"テーブルに飾る", rec:["arrange","hanataba"],
+      tips:["食卓には、香りの強くない花がおすすめです","低めにお作りすると、向かいの人の顔が見えます"]},
+    {id:"kisetsu", ico:"🎍", name:"季節の行事",             sub:"お正月・ひな祭り・クリスマスなど", rec:["arrange","hanataba","hachi"],
+      tips:["行事の前は混み合います。早めのご予約が安心です"]},
+  ],
+};
+const sceneOf = () => (SCENES[state.p] || []).find(x => x.id===state.sc) || null;
 
 /* 形 */
 const STYLES = {
@@ -201,18 +277,19 @@ const NOTES = {
   jitaku:["お好きな花を1本から選べます","ご予算を伝えていただければ、その金額でまとめます"],
 };
 
-const state = {p:null, s:null, b:null, c:null};
+const state = {p:null, sc:null, s:null, b:null, c:null};
+const colorList = () => { const sc = sceneOf(); return (sc && sc.colors) || COLORS[state.p==="sonae" ? "sonae" : "default"]; };
 const app = document.getElementById("app");
 const esc = t => String(t).replace(/[&<>"]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 const yen = n => n.toLocaleString("ja-JP") + "円";
 
 function steps(n){
-  document.getElementById("steps").innerHTML = [1,2,3,4,5].map(i => `<i class="${i<=n?"on":""}"></i>`).join("");
+  document.getElementById("steps").innerHTML = [1,2,3,4,5,6].map(i => `<i class="${i<=n?"on":""}"></i>`).join("");
 }
 function go(step){ history.pushState({step, ...state}, ""); render(step); }
 window.addEventListener("popstate", e => {
   const st = e.state || {step:0};
-  Object.assign(state, {p:st.p||null, s:st.s||null, b:st.b||null, c:st.c||null});
+  Object.assign(state, {p:st.p||null, sc:st.sc||null, s:st.s||null, b:st.b||null, c:st.c ?? null});
   render(st.step || 0);
 });
 function back(){ history.back(); }
@@ -225,7 +302,7 @@ function photosFor(b){
 }
 function pickBudget(b){
   const ps = photosFor(b);
-  if(!ps.length){ state.b = b; go(4); return; }
+  if(!ps.length){ state.b = b; go(5); return; }
   const box = document.createElement("div");
   box.className = "sheet";
   box.onclick = e => { if(e.target === box) closeSheet(); };
@@ -234,7 +311,7 @@ function pickBudget(b){
     <div class="photos">${ps.map(f => `<img src="photos/${esc(f)}" alt="${yen(b)}の${esc(STYLES[state.s].name)}の参考写真" loading="lazy">`).join("")}</div>
     ${ps.length > 1 ? `<small>横にずらすと、ほかの写真も見られます</small>` : ""}
     <small>サンマルコでお作りしたものです。季節や入荷によって、花の種類や色は変わります。</small>
-    <button class="primary" onclick="closeSheet();state.b=${b};go(4)">この金額にする</button>
+    <button class="primary" onclick="closeSheet();state.b=${b};go(5)">この金額にする</button>
     <button class="back" onclick="closeSheet()">← ほかの金額を見る</button></div>`;
   document.body.appendChild(box);
 }
@@ -246,7 +323,7 @@ function render(step){
   window.scrollTo(0,0);
   if(step===0){
     app.innerHTML = `
-      <p class="lead">ご来店ありがとうございます。<br>花屋がはじめてでも大丈夫です。<b>4つの質問に答えるだけ</b>で、スタッフに伝える内容がまとまります。</p>
+      <p class="lead">ご来店ありがとうございます。<br>花屋がはじめてでも大丈夫です。<b>5つの質問に答えるだけ</b>で、スタッフに伝える内容がまとまります。</p>
       <div class="note wait"><b>⏱ お作りするのに少しお時間をいただきます</b>花束は20分前後、アレンジは30分前後かかります。ご注文が混み合っているときは、もう少しお時間をいただく場合があります。お急ぎのときは、お電話でご予約いただくと待たずにお受け取りいただけます。</div>
       <button class="primary" onclick="go(1)">はじめる</button>
       ${extras()}`;
@@ -261,44 +338,59 @@ function render(step){
     return;
   }
   if(step===2){
-    app.innerHTML = `<h2>② どんな形にしますか？</h2><p class="hint">${esc(pName())}には、こんな形があります。</p>
-      <div class="opts">${STYLE_BY_PURPOSE[state.p].map(k => { const x = STYLES[k]; return `
-        <button class="opt" onclick="state.s='${k}';go(3)"><span class="pic">${PICS[k]||x.ico}</span>
-        <span><b>${x.name}</b><small>${x.sub}</small></span></button>`; }).join("")}</div>
+    app.innerHTML = `<h2>② どんな場面ですか？</h2><p class="hint">${esc(pName())}の中で、いちばん近いものを選んでください。</p>
+      <div class="opts">${(SCENES[state.p]||[]).map(x => `
+        <button class="opt" onclick="state.sc='${x.id}';go(3)"><span class="ico">${x.ico}</span>
+        <span><b>${x.name}</b><small>${x.sub}</small></span></button>`).join("")}
+        <button class="opt" onclick="state.sc=null;go(3)"><span class="ico">💬</span>
+        <span><b>ほかの場面・とくになし</b><small>この中にないときはこちら</small></span></button></div>
       <button class="back" onclick="back()">← もどる</button>`;
     return;
   }
   if(step===3){
-    const pop = popular(state.p, state.s);
-    const list = state.p==="sonae" ? BUDGETS.filter(b => b>=2000 && b<=20000) : BUDGETS;
-    app.innerHTML = `<h2>③ ご予算は？</h2><p class="hint">${budgetRange(state.p)}<br>金額に合わせてお作りします（税込）。</p>
-      <div class="opts grid2">${list.map(b => `
-        <button class="opt" onclick="pickBudget(${b})"><b>${yen(b)}</b>${pop.includes(b)?'<span class="tag">よく選ばれる</span>':""}${photosFor(b).length?'<span class="cam">📷 写真あり</span>':""}</button>`).join("")}
-        <button class="opt" onclick="state.b='相談';go(4)"><b>相談したい</b></button></div>
+    const sc = sceneOf(), rec = sc ? sc.rec : [];
+    const order = [...rec, ...STYLE_BY_PURPOSE[state.p].filter(k => !rec.includes(k))];
+    if(!order.includes("omakase")) order.push("omakase");
+    app.innerHTML = `<h2>③ どんな形にしますか？</h2><p class="hint">${esc(sc ? sc.name : pName())}には、こんな形があります。</p>
+      <div class="opts">${order.map(k => { const x = STYLES[k]; return `
+        <button class="opt" onclick="state.s='${k}';go(4)"><span class="pic">${PICS[k]||x.ico}</span>
+        <span><b>${x.name}</b><small>${x.sub}</small></span>${rec.includes(k)?'<span class="tag">おすすめ</span>':""}</button>`; }).join("")}</div>
       <button class="back" onclick="back()">← もどる</button>`;
     return;
   }
   if(step===4){
-    const cs = COLORS[state.p==="sonae" ? "sonae" : "default"];
-    app.innerHTML = `<h2>④ 色や雰囲気は？</h2><p class="hint">迷ったら「おまかせ」で大丈夫です。</p>
-      <div class="opts grid2">${cs.map((c,i) => `
-        <button class="opt" onclick="state.c=${i};go(5)"><b>${c}</b></button>`).join("")}</div>
+    const pop = popular(state.p, state.s);
+    const list = state.p==="sonae" ? BUDGETS.filter(b => b>=2000 && b<=20000) : BUDGETS;
+    app.innerHTML = `<h2>④ ご予算は？</h2><p class="hint">${budgetRange(state.p)}<br>金額に合わせてお作りします（税込）。</p>
+      <div class="opts grid2">${list.map(b => `
+        <button class="opt" onclick="pickBudget(${b})"><b>${yen(b)}</b>${pop.includes(b)?'<span class="tag">よく選ばれる</span>':""}${photosFor(b).length?'<span class="cam">📷 写真あり</span>':""}</button>`).join("")}
+        <button class="opt" onclick="state.b='相談';go(5)"><b>相談したい</b></button></div>
       <button class="back" onclick="back()">← もどる</button>`;
     return;
   }
   if(step===5){
-    const cs = COLORS[state.p==="sonae" ? "sonae" : "default"];
+    const cs = colorList();
+    app.innerHTML = `<h2>⑤ 色や雰囲気は？</h2><p class="hint">迷ったら「おまかせ」で大丈夫です。</p>
+      <div class="opts grid2">${cs.map((c,i) => `
+        <button class="opt" onclick="state.c=${i};go(6)"><b>${esc(c)}</b></button>`).join("")}</div>
+      <button class="back" onclick="back()">← もどる</button>`;
+    return;
+  }
+  if(step===6){
+    const cs = colorList(), sc = sceneOf();
     const notes = NOTES[state.p] || [];
     app.innerHTML = `<h2>この画面をスタッフに見せてください</h2>
       <div class="show"><div class="cap">ご注文メモ</div><table>
         <tr><th>用途</th><td>${esc(pName())}</td></tr>
+        ${sc ? `<tr><th>場面</th><td>${esc(sc.name)}</td></tr>` : ""}
         <tr><th>形</th><td>${esc(STYLES[state.s].name)}</td></tr>
         <tr><th>ご予算</th><td>${typeof state.b==="number" ? yen(state.b)+"くらい" : "相談したい"}</td></tr>
         <tr><th>色</th><td>${esc(cs[state.c])}</td></tr></table>
         ${typeof state.b==="number" && photosFor(state.b).length ? `<div class="ref"><img src="photos/${esc(photosFor(state.b)[0])}" alt="参考写真"><small>参考にした写真</small></div>` : ""}</div>
+      ${sc ? `<div class="note"><b>${esc(sc.ico)} ${esc(sc.name)}のポイント</b><ul>${sc.tips.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${notes.length ? `<div class="note"><b>${esc(pName())}で知っておくと安心なこと</b><ul>${notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${STYLES[state.s].wait ? `<div class="note wait"><b>⏱ お作りするのに ${STYLES[state.s].wait} かかります</b>ご注文をいただいてから1つずつお作りします。ご注文が混み合っているときは、もう少しお時間をいただく場合があります。お急ぎのときは、先にお電話（<a href="tel:0116628125">011-662-8125</a>）でご予約いただくと、待たずにお受け取りいただけます。</div>` : ""}
-      <button class="primary" onclick="history.go(-5)">最初からやり直す</button>
+      <button class="primary" onclick="history.go(-6)">最初からやり直す</button>
       ${extras()}`;
   }
 }
