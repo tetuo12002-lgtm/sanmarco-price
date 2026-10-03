@@ -8,11 +8,11 @@
 <style>
   :root{
     --bg:#f6f4ef; --card:#ffffff; --ink:#1f2a24; --sub:#6b746e; --line:#e4e0d8;
-    --accent:#2f5d46; --accent-soft:#e3ece6;
+    --accent:#2f5d46; --accent-soft:#e3ece6; --price:#b23a48;
   }
   @media (prefers-color-scheme: dark){
     :root{ --bg:#141816; --card:#1d2320; --ink:#eef1ef; --sub:#9aa39d; --line:#2c3430;
-      --accent:#8fc3a5; --accent-soft:#24312a; }
+      --accent:#8fc3a5; --accent-soft:#24312a; --price:#ff8a96; }
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
@@ -47,6 +47,12 @@
   .name{font-size:16px;font-weight:600;overflow-wrap:anywhere}
   .meta{font-size:12.5px;color:var(--sub);margin-top:2px;display:flex;flex-wrap:wrap;gap:4px 10px}
   .color{display:inline-block;background:var(--accent-soft);color:var(--ink);border-radius:6px;padding:0 6px}
+  .price{text-align:right;flex:none}
+  .yen{font-size:20px;font-weight:700;color:var(--price);font-variant-numeric:tabular-nums}
+  .unit{font-size:11.5px;color:var(--sub)}
+  .notice{margin:10px 16px 0;padding:9px 12px;border-radius:10px;font-size:13px;background:var(--card);border:1px solid var(--line);color:var(--sub)}
+  .notice.on{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
+  .notice b{color:var(--price)}
   .empty{text-align:center;color:var(--sub);padding:40px 0}
   footer{text-align:center;font-size:11.5px;color:var(--sub);padding:0 16px 32px}
 </style>
@@ -63,6 +69,7 @@
     <input id="q" type="search" placeholder="花の名前・色で探す" autocomplete="off">
     <button id="clear" type="button" aria-label="クリア">×</button>
   </label>
+  <div class="notice" id="notice" hidden></div>
   <div class="chips" id="chips"></div>
 </div>
 <main id="list"></main>
@@ -74,7 +81,59 @@
   document.getElementById("shop").textContent = SHOP;
   document.title = SHOP + " 本日の切花";
 
-  var state = { q: "", cat: "" }, data = null;
+  var state = { q: "", cat: "" }, data = null, prices = null;
+
+  // ===== 店内限定の価格表示 =====
+  // レジ横のQR（URLの #k=鍵）を読むと、そのスマホで1時間だけ価格を表示する。
+  // 価格は data.js に暗号化して入っていて（enc）、この鍵がないと読めない。
+  var KEY_STORE = "sanmarco-price-key", SHOW_MS = 60 * 60 * 1000;
+  var m = location.hash.match(/[#&]k=([A-Za-z0-9_-]+)/);
+  if (m) {
+    try { localStorage.setItem(KEY_STORE, JSON.stringify({ k: m[1], exp: Date.now() + SHOW_MS })); } catch (e) {}
+    history.replaceState(null, "", location.pathname + location.search);   // 鍵をアドレス欄に残さない
+  }
+  function storedKey(){
+    try {
+      var v = JSON.parse(localStorage.getItem(KEY_STORE) || "null");
+      if (v && v.exp > Date.now()) return v;
+      localStorage.removeItem(KEY_STORE);
+    } catch (e) {}
+    return m ? { k: m[1], exp: Date.now() + SHOW_MS } : null;
+  }
+  function b64(s){
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+    var bin = atob(s + "===".slice((s.length + 3) % 4)), a = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+    return a;
+  }
+  function unlock(){
+    var v = storedKey();
+    if (!v || !data.enc || !window.crypto || !crypto.subtle) return Promise.resolve(null);
+    var raw = b64(data.enc);
+    return crypto.subtle.importKey("raw", b64(v.k), "AES-CBC", false, ["decrypt"])
+      .then(function(key){ return crypto.subtle.decrypt({ name: "AES-CBC", iv: raw.slice(0, 16) }, key, raw.slice(16)); })
+      .then(function(buf){ return JSON.parse(new TextDecoder().decode(buf)); })
+      .catch(function(){ return "bad"; });
+  }
+  var timer = null;
+  function showNotice(){
+    var v = storedKey(), n = $("notice");
+    n.hidden = false;
+    if (prices === "bad") {
+      n.className = "notice";
+      n.textContent = "読み取ったQRが古くなっています。店内レジ横の新しいQRを読み取ってください。";
+    } else if (prices && v) {
+      var min = Math.max(1, Math.ceil((v.exp - Date.now()) / 60000));
+      n.className = "notice on";
+      n.innerHTML = "店内限定で価格を表示しています（あと<b>" + min + "分</b>）";
+    } else {
+      if (prices) { prices = null; render(); }   // 1時間たったら価格を消す
+      n.className = "notice";
+      n.textContent = "価格は、店内レジ横のQRを読み取ると1時間表示されます。";
+      clearInterval(timer); timer = null;
+    }
+    setHeaderHeight();
+  }
   var $ = function(id){ return document.getElementById(id); };
   var norm = function(s){ return (s || "").normalize("NFKC").toLowerCase()
     .replace(/[ァ-ヶ]/g, function(c){ return String.fromCharCode(c.charCodeAt(0) - 0x60); }); };
@@ -85,8 +144,9 @@
   function render(){
     var groups = [], map = {};
     var q = norm(state.q);
-    data.items.forEach(function(it){
-      // it = [品名, 品種, 色, 産地]（価格は載せない）
+    data.items.forEach(function(it, i){
+      // it = [品名, 品種, 色, 産地]（価格は data.enc に暗号化して別に入っている）
+      it._i = i;
       if (state.cat && it[0] !== state.cat) return;
       if (q && norm(it.slice(0,4).join(" ")).indexOf(q) < 0) return;
       if (!map[it[0]]) { map[it[0]] = []; groups.push(it[0]); }
@@ -98,8 +158,11 @@
           var meta = [];
           if (it[2]) meta.push('<span class="color">' + esc(it[2]) + '</span>');
           if (it[3]) meta.push('<span>' + esc(it[3]) + '産</span>');
+          var p = prices && prices !== "bad" && prices[it._i];   // p = [単位, 税込価格]
           return '<div class="row"><div class="info"><div class="name">' + esc(it[1] || it[0]) + '</div>' +
-            (meta.length ? '<div class="meta">' + meta.join("") + '</div>' : '') + '</div></div>';
+            (meta.length ? '<div class="meta">' + meta.join("") + '</div>' : '') + '</div>' +
+            (p ? '<div class="price"><div class="yen">¥' + Number(p[1]).toLocaleString("ja-JP") + '</div>' +
+                 '<div class="unit">' + esc(p[0]) + ' 税込</div></div>' : '') + '</div>';
         }).join("") + '</div></section>';
     }).join("");
     $("list").innerHTML = html || '<div class="empty">該当する花が見つかりません</div>';
@@ -130,6 +193,15 @@
     data = window.PRICE_DATA;
     $("updated").textContent = data.updated + " 更新　全" + data.items.length + "品";
     renderChips(); render(); setHeaderHeight();
+    unlock().then(function(p){
+      prices = p;
+      if (p) render();
+      showNotice();
+      if (p && p !== "bad") {
+        timer = setInterval(showNotice, 30000);
+        document.addEventListener("visibilitychange", function(){ if (prices) showNotice(); });
+      }
+    });
   };
   s.onerror = function(){ $("updated").textContent = "データを読み込めませんでした"; };
   document.body.appendChild(s);
