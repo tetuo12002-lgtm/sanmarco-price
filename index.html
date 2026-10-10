@@ -26,6 +26,10 @@
   h1{margin:0;font-size:21px;font-weight:700}
   .updated{font-size:12px;opacity:.9;margin-top:2px}
   .tools{position:sticky;top:var(--hh,78px);z-index:9;background:var(--bg);padding:10px 0 6px;border-bottom:1px solid var(--line)}
+  .tabs{display:flex;gap:4px;margin:0 16px 10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px}
+  .tab{flex:1;border:0;background:none;color:var(--sub);font:inherit;font-size:15px;font-weight:700;padding:9px 0;border-radius:9px;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--accent);color:#fff}
+  @media (prefers-color-scheme: dark){ .tab[aria-selected="true"]{color:#10160f} }
   .search{margin:0 16px;display:flex;align-items:center;gap:8px;background:var(--card);
     border:1px solid var(--line);border-radius:12px;padding:0 12px}
   .search input{flex:1;border:0;outline:0;background:transparent;color:var(--ink);font-size:16px;padding:11px 0}
@@ -50,10 +54,12 @@
   .price{text-align:right;flex:none}
   .yen{font-size:20px;font-weight:700;color:var(--price);font-variant-numeric:tabular-nums}
   .unit{font-size:11.5px;color:var(--sub)}
+  .care{flex:none;font-size:12.5px;font-weight:700;color:var(--accent);text-decoration:none;border:1px solid var(--accent);
+    border-radius:999px;padding:5px 11px;white-space:nowrap}
   .notice{margin:10px 16px 0;padding:9px 12px;border-radius:10px;font-size:13px;background:var(--card);border:1px solid var(--line);color:var(--sub)}
   .notice.on{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
   .notice b{color:var(--price)}
-  .empty{text-align:center;color:var(--sub);padding:40px 0}
+  .empty{text-align:center;color:var(--sub);padding:40px 16px}
   footer{text-align:center;font-size:11.5px;color:var(--sub);padding:0 16px 32px}
 </style>
 </head>
@@ -64,6 +70,10 @@
   <div class="updated" id="updated">読み込み中…</div>
 </header>
 <div class="tools" id="tools">
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-t="kiri" aria-selected="true">切花</button>
+    <button class="tab" role="tab" data-t="nae" aria-selected="false">花苗・鉢物</button>
+  </div>
   <label class="search">
     <span aria-hidden="true">🔍</span>
     <input id="q" type="search" placeholder="花の名前・色で探す" autocomplete="off">
@@ -81,9 +91,18 @@
   document.getElementById("shop").textContent = SHOP;
   document.title = SHOP + " 最新入荷の花";
 
-  var state = { q: "", cat: "" }, data = null, prices = null;
+  // ?t=nae で開くと「花苗・鉢物」タブから表示する
+  var state = { q: "", cat: "", tab: /[?&]t=nae\b/.test(location.search) ? "nae" : "kiri" };
+  var data = null, prices = null, nae = null;
+  var NAE_DAYS = 21;   // 花苗は直近3週間の入荷を表示
 
-  // ===== 店内限定の価格表示 =====
+  // 花苗の名前に含まれる言葉 → 育て方ページ（care.html?id=）。上から順に探す
+  var CARE = [["エリカ","calluna"],["カルーナ","calluna"],["カランコエ","kalanchoe"],["カリガネ","karigane"],
+    ["カリオプテリス","karigane"],["キキョウ","kikyo"],["コスモス","cosmos"],["シクラメン","cyclamen"],["ビオラ","viola"],
+    ["ファレノ","kochoran"],["コチョウラン","kochoran"],["胡蝶蘭","kochoran"],["ペンタス","pentas"],["リンドウ","rindo"],
+    ["コバルトセージ","cobaltsage"],["トウガラシ","togarashi"],["唐辛子","togarashi"],["パンジー","pansy"]];
+
+  // ===== 店内限定の価格表示（切花のみ） =====
   // レジ横のQR（URLの #k=鍵）を読むと、そのスマホで1時間だけ価格を表示する。
   // 価格は data.js に暗号化して入っていて（enc）、この鍵がないと読めない。
   var KEY_STORE = "sanmarco-price-key", SHOW_MS = 60 * 60 * 1000;
@@ -118,6 +137,7 @@
   var timer = null;
   function showNotice(){
     var v = storedKey(), n = $("notice");
+    if (state.tab !== "kiri") { n.hidden = true; setHeaderHeight(); return; }
     n.hidden = false;
     if (prices === "bad") {
       n.className = "notice";
@@ -141,7 +161,10 @@
   function setHeaderHeight(){ document.documentElement.style.setProperty("--hh", $("hd").offsetHeight + "px"); }
   addEventListener("resize", setHeaderHeight);
 
-  function render(){
+  function esc(s){ return String(s).normalize("NFKC").replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  // ===== 切花 =====
+  function renderKiri(){
     var groups = [], map = {};
     var q = norm(state.q);
     data.items.forEach(function(it, i){
@@ -168,15 +191,86 @@
     $("list").innerHTML = html || '<div class="empty">該当する花が見つかりません</div>';
   }
 
-  function esc(s){ return String(s).normalize("NFKC").replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
-
-  function renderChips(){
-    var cats = [];
-    data.items.forEach(function(it){ if (cats.indexOf(it[0]) < 0) cats.push(it[0]); });
-    $("chips").innerHTML = ['<button class="chip" data-c="" aria-pressed="true">すべて</button>']
-      .concat(cats.map(function(c){ return '<button class="chip" data-c="' + esc(c) + '" aria-pressed="false">' + esc(c) + '</button>'; })).join("");
+  // ===== 花苗・鉢物 =====
+  // nae.js の NAE_DATA = [{d:"2026-10-06", items:[[品名, 品種, 大きさ], ...]}, ...]（1回の入荷が1件）
+  function loadNae(){
+    var cut = new Date(Date.now() - NAE_DAYS * 864e5), list = [];
+    var cutStr = cut.getFullYear() + "-" + ("0" + (cut.getMonth() + 1)).slice(-2) + "-" + ("0" + cut.getDate()).slice(-2);
+    (window.NAE_DATA || []).forEach(function(b){
+      if (!b || !b.d || b.d < cutStr) return;
+      (b.items || []).forEach(function(it){ list.push({ d: b.d, name: it[0] || "", vari: it[1] || "", size: it[2] || "" }); });
+    });
+    list.sort(function(a, b){ return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; });
+    return list;
+  }
+  function careId(it){
+    var s = norm(it.name + " " + it.vari);
+    for (var i = 0; i < CARE.length; i++) if (s.indexOf(norm(CARE[i][0])) >= 0) return CARE[i][1];
+    return "";
+  }
+  function dayLabel(d){
+    var p = d.split("-"), dt = new Date(+p[0], +p[1] - 1, +p[2]);
+    return (+p[1]) + "月" + (+p[2]) + "日（" + "日月火水木金土".charAt(dt.getDay()) + "）入荷";
+  }
+  function renderNae(){
+    if (!nae.length) {
+      $("list").innerHTML = '<div class="empty">ここ3週間の花苗・鉢物の入荷はありません。<br>入荷しだい、こちらでお知らせします。</div>';
+      return;
+    }
+    var groups = [], map = {};
+    var q = norm(state.q);
+    nae.forEach(function(it){
+      if (state.cat && norm(it.name) !== state.cat) return;
+      if (q && norm(it.name + " " + it.vari + " " + it.size).indexOf(q) < 0) return;
+      if (!map[it.d]) { map[it.d] = []; groups.push(it.d); }
+      map[it.d].push(it);
+    });
+    var html = groups.map(function(d){
+      return '<section><h2>' + dayLabel(d) + '<small>' + map[d].length + '品</small></h2><div class="list">' +
+        map[d].map(function(it){
+          var meta = [], id = careId(it);
+          if (it.vari) meta.push('<span class="color">' + esc(it.vari) + '</span>');
+          if (it.size) meta.push('<span>' + esc(it.size) + '</span>');
+          return '<div class="row"><div class="info"><div class="name">' + esc(it.name) + '</div>' +
+            (meta.length ? '<div class="meta">' + meta.join("") + '</div>' : '') + '</div>' +
+            (id ? '<a class="care" href="care.html?id=' + id + '">育て方 →</a>' : '') + '</div>';
+        }).join("") + '</div></section>';
+    }).join("");
+    $("list").innerHTML = html || '<div class="empty">該当する苗が見つかりません</div>';
   }
 
+  function render(){ if (state.tab === "nae") renderNae(); else renderKiri(); }
+
+  function renderChips(){
+    var cats = [], labels = {};
+    if (state.tab === "nae") {
+      nae.forEach(function(it){ var k = norm(it.name); if (!labels[k]) { labels[k] = it.name; cats.push(k); } });
+    } else {
+      data.items.forEach(function(it){ if (cats.indexOf(it[0]) < 0) { cats.push(it[0]); labels[it[0]] = it[0]; } });
+    }
+    $("chips").innerHTML = ['<button class="chip" data-c="" aria-pressed="true">すべて</button>']
+      .concat(cats.map(function(c){ return '<button class="chip" data-c="' + esc(c) + '" aria-pressed="false">' + esc(labels[c]) + '</button>'; })).join("");
+  }
+
+  function showUpdated(){
+    if (state.tab === "nae") {
+      $("updated").textContent = nae.length ? "ここ3週間の入荷　全" + nae.length + "品" : "ここ3週間の入荷";
+    } else {
+      $("updated").textContent = data.updated + " 更新　全" + data.items.length + "品";
+    }
+  }
+
+  function setTab(t){
+    state.tab = t; state.cat = ""; state.q = ""; $("q").value = ""; $("clear").style.display = "none";
+    $("q").placeholder = t === "nae" ? "苗の名前で探す" : "花の名前・色で探す";
+    [].forEach.call(document.querySelectorAll(".tab"), function(b){ b.setAttribute("aria-selected", b.getAttribute("data-t") === t ? "true" : "false"); });
+    history.replaceState(null, "", location.pathname + (t === "nae" ? "?t=nae" : ""));
+    showUpdated(); renderChips(); render(); showNotice(); scrollTo({ top: 0 });
+  }
+
+  document.querySelector(".tabs").addEventListener("click", function(e){
+    var b = e.target.closest(".tab"); if (b && b.getAttribute("data-t") !== state.tab) setTab(b.getAttribute("data-t"));
+  });
   $("chips").addEventListener("click", function(e){
     var b = e.target.closest(".chip"); if (!b) return;
     state.cat = b.getAttribute("data-c");
@@ -186,25 +280,31 @@
   $("q").addEventListener("input", function(){ state.q = this.value; $("clear").style.display = this.value ? "block" : "none"; render(); });
   $("clear").addEventListener("click", function(){ $("q").value = ""; state.q = ""; this.style.display = "none"; render(); });
 
-  // data.js を毎回最新で読み込む（キャッシュ回避）
-  var s = document.createElement("script");
-  s.src = "data.js?t=" + Date.now();
-  s.onload = function(){
+  // data.js（切花）と nae.js（花苗）を毎回最新で読み込む（キャッシュ回避）
+  function load(src){
+    return new Promise(function(ok){
+      var s = document.createElement("script");
+      s.src = src + "?t=" + Date.now();
+      s.onload = function(){ ok(true); };
+      s.onerror = function(){ ok(false); };
+      document.body.appendChild(s);
+    });
+  }
+  Promise.all([load("data.js"), load("nae.js")]).then(function(r){
+    if (!r[0]) { $("updated").textContent = "データを読み込めませんでした"; return; }
     data = window.PRICE_DATA;
-    $("updated").textContent = data.updated + " 更新　全" + data.items.length + "品";
-    renderChips(); render(); setHeaderHeight();
+    nae = loadNae();
+    setTab(state.tab);
     unlock().then(function(p){
       prices = p;
-      if (p) render();
+      if (p && state.tab === "kiri") render();
       showNotice();
       if (p && p !== "bad") {
         timer = setInterval(showNotice, 30000);
         document.addEventListener("visibilitychange", function(){ if (prices) showNotice(); });
       }
     });
-  };
-  s.onerror = function(){ $("updated").textContent = "データを読み込めませんでした"; };
-  document.body.appendChild(s);
+  });
   setHeaderHeight();
 })();
 </script>
