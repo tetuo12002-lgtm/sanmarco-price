@@ -55,6 +55,8 @@
   .photos{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory}
   .photos figure{flex:none;width:100%;margin:0;scroll-snap-align:center;position:relative}
   .photos .view{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);color:#fff;font-size:13px;border-radius:999px;padding:3px 10px}
+  .photos .no{position:absolute;top:10px;right:10px;background:var(--accent);color:#fff;font-size:16px;font-weight:700;border-radius:999px;padding:3px 12px;letter-spacing:.03em}
+  .refno{display:inline-block;margin-top:6px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;border-radius:999px;padding:2px 12px}
   .photos img{display:block;width:100%;max-height:56vh;object-fit:contain;background:var(--card);border-radius:12px}
   .size{margin-top:8px;text-align:center}
   .size b{display:inline-block;background:var(--accent-soft);border-radius:999px;padding:4px 12px;font-size:15px}
@@ -304,6 +306,8 @@ const pName = () => PURPOSES.find(x => x.id===state.p).name;
 const PHOTOS = window.PHOTOS || {};
 const SIZES = window.SIZES || {};
 /* 写真のお花の大きさ（photos.js の SIZES）。500mlペットボトル（高さ約20cm）何本分かも添える */
+/* 写真の番号（photos.js の SIZES の no）。電話で写真を伝えてもらうため */
+function photoNo(f){ return SIZES[f] && SIZES[f].no ? SIZES[f].no : ""; }
 function sizeHtml(f){
   const z = SIZES[f];
   if(!z || !(z.h || z.w)) return "";
@@ -325,8 +329,9 @@ function pickBudget(b){
   box.onclick = e => { if(e.target === box) closeSheet(); };
   box.innerHTML = `<div class="sheet-in">
     <b>${yen(b)}の${esc(STYLES[state.s].name)}の例</b>
-    <div class="photos">${ps.map(f => `<figure><img src="photos/${esc(f)}" alt="${yen(b)}の${esc(STYLES[state.s].name)}の参考写真" loading="lazy">${SIZES[f] && SIZES[f].t ? `<span class="view">${esc(SIZES[f].t)}</span>` : ""}${sizeHtml(f)}</figure>`).join("")}</div>
+    <div class="photos">${ps.map(f => `<figure><img src="photos/${esc(f)}" alt="${yen(b)}の${esc(STYLES[state.s].name)}の参考写真" loading="lazy">${SIZES[f] && SIZES[f].t ? `<span class="view">${esc(SIZES[f].t)}</span>` : ""}${photoNo(f) ? `<span class="no">No.${photoNo(f)}</span>` : ""}${sizeHtml(f)}</figure>`).join("")}</div>
     ${ps.length > 1 ? `<small>横にずらすと、ほかの写真も見られます</small>` : ""}
+    ${ps.some(photoNo) ? `<small>お電話でご注文のときは、写真の番号（No.）をお伝えください。</small>` : ""}
     <small>サンマルコでお作りしたものです。季節や入荷によって、花の種類や色は変わります。</small>
     <button class="primary" onclick="closeSheet();state.b=${b};go(5)">この金額にする</button>
     <button class="back" onclick="closeSheet()">← ほかの金額を見る</button></div>`;
@@ -403,7 +408,7 @@ function render(step){
         <tr><th>形</th><td>${esc(STYLES[state.s].name)}</td></tr>
         <tr><th>ご予算</th><td>${typeof state.b==="number" ? yen(state.b)+"くらい" : "相談したい"}</td></tr>
         <tr><th>色</th><td>${esc(cs[state.c])}</td></tr></table>
-        ${typeof state.b==="number" && photosFor(state.b).length ? `<div class="ref"><img src="photos/${esc(photosFor(state.b)[0])}" alt="参考写真">${sizeHtml(photosFor(state.b)[0])}<small>参考にした写真</small></div>` : ""}</div>
+        ${typeof state.b==="number" && photosFor(state.b).length ? `<div class="ref"><img src="photos/${esc(photosFor(state.b)[0])}" alt="参考写真">${photoNo(photosFor(state.b)[0]) ? `<div><span class="refno">写真 No.${photoNo(photosFor(state.b)[0])}</span></div>` : ""}${sizeHtml(photosFor(state.b)[0])}<small>参考にした写真</small></div>` : ""}</div>
       ${sc ? `<div class="note"><b>${esc(sc.ico)} ${esc(sc.name)}のポイント</b><ul>${sc.tips.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${notes.length ? `<div class="note"><b>${esc(pName())}で知っておくと安心なこと</b><ul>${notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${STYLES[state.s].wait ? `<div class="note wait"><b>⏱ お作りするのに ${STYLES[state.s].wait} かかります</b>ご注文をいただいてから1つずつお作りします。ご注文が混み合っているときは、もう少しお時間をいただく場合があります。お急ぎのときは、先にお電話（<a href="tel:0116628125">011-662-8125</a>）でご予約いただくと、待たずにお受け取りいただけます。</div>` : ""}
