@@ -53,7 +53,8 @@
   .sheet-in > b{display:block;font-size:18px;margin-bottom:10px}
   .sheet-in small{display:block;font-size:13px;color:var(--sub);margin-top:6px}
   .photos{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory}
-  .photos figure{flex:none;width:100%;margin:0;scroll-snap-align:center}
+  .photos figure{flex:none;width:100%;margin:0;scroll-snap-align:center;position:relative}
+  .photos .view{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);color:#fff;font-size:13px;border-radius:999px;padding:3px 10px}
   .photos img{display:block;width:100%;max-height:56vh;object-fit:contain;background:var(--card);border-radius:12px}
   .size{margin-top:8px;text-align:center}
   .size b{display:inline-block;background:var(--accent-soft);border-radius:999px;padding:4px 12px;font-size:15px}
@@ -324,7 +325,7 @@ function pickBudget(b){
   box.onclick = e => { if(e.target === box) closeSheet(); };
   box.innerHTML = `<div class="sheet-in">
     <b>${yen(b)}の${esc(STYLES[state.s].name)}の例</b>
-    <div class="photos">${ps.map(f => `<figure><img src="photos/${esc(f)}" alt="${yen(b)}の${esc(STYLES[state.s].name)}の参考写真" loading="lazy">${sizeHtml(f)}</figure>`).join("")}</div>
+    <div class="photos">${ps.map(f => `<figure><img src="photos/${esc(f)}" alt="${yen(b)}の${esc(STYLES[state.s].name)}の参考写真" loading="lazy">${SIZES[f] && SIZES[f].t ? `<span class="view">${esc(SIZES[f].t)}</span>` : ""}${sizeHtml(f)}</figure>`).join("")}</div>
     ${ps.length > 1 ? `<small>横にずらすと、ほかの写真も見られます</small>` : ""}
     <small>サンマルコでお作りしたものです。季節や入荷によって、花の種類や色は変わります。</small>
     <button class="primary" onclick="closeSheet();state.b=${b};go(5)">この金額にする</button>
