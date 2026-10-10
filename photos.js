@@ -25,4 +25,8 @@ window.PHOTOS = {
      "hanataba-3000-1.jpg": { h: 45, w: 25 },
 */
 window.SIZES = {
+  "oiwai-arrange-5000-1.jpg": { h: 40, w: 35 },
+  "oiwai-arrange-5000-2.jpg": { h: 40, w: 35 },
+  "sonae-arrange-5000-1.jpg": { h: 50, w: 45 },
+  "sonae-arrange-5000-2.jpg": { h: 50, w: 45 },
 };
