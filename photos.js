@@ -15,3 +15,14 @@ window.PHOTOS = {
   "oiwai-arrange-5000": ["oiwai-arrange-5000-1.jpg", "oiwai-arrange-5000-2.jpg"],
   "sonae-arrange-5000": ["sonae-arrange-5000-1.jpg", "sonae-arrange-5000-2.jpg"],
 };
+
+/* 写真のお花の大きさ（cm）。写真の下に「高さ 約○cm × 幅 約○cm」と出ます。
+   書き方：  "写真ファイル名": { h: 高さ, w: 幅 },
+   分からない方は書かなくて大丈夫です（例：{ h: 35 } だけでもOK）。
+   書いていない写真は、大きさを表示しません。
+
+   例：
+     "hanataba-3000-1.jpg": { h: 45, w: 25 },
+*/
+window.SIZES = {
+};

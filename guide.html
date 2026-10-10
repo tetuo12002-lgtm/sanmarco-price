@@ -53,7 +53,11 @@
   .sheet-in > b{display:block;font-size:18px;margin-bottom:10px}
   .sheet-in small{display:block;font-size:13px;color:var(--sub);margin-top:6px}
   .photos{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory}
-  .photos img{flex:none;width:100%;max-height:60vh;object-fit:contain;background:var(--card);border-radius:12px;scroll-snap-align:center}
+  .photos figure{flex:none;width:100%;margin:0;scroll-snap-align:center}
+  .photos img{display:block;width:100%;max-height:56vh;object-fit:contain;background:var(--card);border-radius:12px}
+  .size{margin-top:8px;text-align:center}
+  .size b{display:inline-block;background:var(--accent-soft);border-radius:999px;padding:4px 12px;font-size:15px}
+  .size span{display:block;font-size:13px;color:var(--sub);margin-top:4px}
   .ref{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;text-align:center}
   .ref img{max-width:100%;max-height:220px;border-radius:10px}
   .ref small{display:block;font-size:12px;color:var(--sub)}
@@ -297,6 +301,18 @@ const pName = () => PURPOSES.find(x => x.id===state.p).name;
 
 /* 参考写真（photos.js に登録したものだけ表示） */
 const PHOTOS = window.PHOTOS || {};
+const SIZES = window.SIZES || {};
+/* 写真のお花の大きさ（photos.js の SIZES）。500mlペットボトル（高さ約20cm）何本分かも添える */
+function sizeHtml(f){
+  const z = SIZES[f];
+  if(!z || !(z.h || z.w)) return "";
+  const parts = [];
+  if(z.h) parts.push(`高さ 約${z.h}cm`);
+  if(z.w) parts.push(`幅 約${z.w}cm`);
+  const n = z.h ? Math.round(z.h / 20 * 2) / 2 : 0;
+  const cmp = n >= 1 ? `500mlのペットボトル（約20cm）の約${n}本分の高さ` : "";
+  return `<div class="size"><b>📏 ${parts.join(" × ")}</b>${cmp ? `<span>${cmp}</span>` : ""}</div>`;
+}
 function photosFor(b){
   return PHOTOS[`${state.p}-${state.s}-${b}`] || PHOTOS[`${state.s}-${b}`] || [];
 }
@@ -308,7 +324,7 @@ function pickBudget(b){
   box.onclick = e => { if(e.target === box) closeSheet(); };
   box.innerHTML = `<div class="sheet-in">
     <b>${yen(b)}の${esc(STYLES[state.s].name)}の例</b>
-    <div class="photos">${ps.map(f => `<img src="photos/${esc(f)}" alt="${yen(b)}の${esc(STYLES[state.s].name)}の参考写真" loading="lazy">`).join("")}</div>
+    <div class="photos">${ps.map(f => `<figure><img src="photos/${esc(f)}" alt="${yen(b)}の${esc(STYLES[state.s].name)}の参考写真" loading="lazy">${sizeHtml(f)}</figure>`).join("")}</div>
     ${ps.length > 1 ? `<small>横にずらすと、ほかの写真も見られます</small>` : ""}
     <small>サンマルコでお作りしたものです。季節や入荷によって、花の種類や色は変わります。</small>
     <button class="primary" onclick="closeSheet();state.b=${b};go(5)">この金額にする</button>
@@ -386,7 +402,7 @@ function render(step){
         <tr><th>形</th><td>${esc(STYLES[state.s].name)}</td></tr>
         <tr><th>ご予算</th><td>${typeof state.b==="number" ? yen(state.b)+"くらい" : "相談したい"}</td></tr>
         <tr><th>色</th><td>${esc(cs[state.c])}</td></tr></table>
-        ${typeof state.b==="number" && photosFor(state.b).length ? `<div class="ref"><img src="photos/${esc(photosFor(state.b)[0])}" alt="参考写真"><small>参考にした写真</small></div>` : ""}</div>
+        ${typeof state.b==="number" && photosFor(state.b).length ? `<div class="ref"><img src="photos/${esc(photosFor(state.b)[0])}" alt="参考写真">${sizeHtml(photosFor(state.b)[0])}<small>参考にした写真</small></div>` : ""}</div>
       ${sc ? `<div class="note"><b>${esc(sc.ico)} ${esc(sc.name)}のポイント</b><ul>${sc.tips.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${notes.length ? `<div class="note"><b>${esc(pName())}で知っておくと安心なこと</b><ul>${notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${STYLES[state.s].wait ? `<div class="note wait"><b>⏱ お作りするのに ${STYLES[state.s].wait} かかります</b>ご注文をいただいてから1つずつお作りします。ご注文が混み合っているときは、もう少しお時間をいただく場合があります。お急ぎのときは、先にお電話（<a href="tel:0116628125">011-662-8125</a>）でご予約いただくと、待たずにお受け取りいただけます。</div>` : ""}
