@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2f5d46">
+<title>注文カレンダー</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --card:#ffffff; --ink:#1f2a24; --sub:#6b746e; --line:#e4e0d8;
+    --accent:#2f5d46; --accent-soft:#e3ece6; --warn:#b23a48; --warn-soft:#f8e4e6;
+    --sun:#c0392b; --sat:#2e6db4;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141816; --card:#1d2320; --ink:#eef1ef; --sub:#9aa39d; --line:#2c3430;
+      --accent:#8fc3a5; --accent-soft:#24312a; --warn:#ff8a96; --warn-soft:#3a2226;
+      --sun:#ff8a80; --sat:#8ab4f8; }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","BIZ UDPGothic","Yu Gothic UI","Meiryo",sans-serif;
+    line-height:1.5}
+  header{background:var(--accent);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
+  @media (prefers-color-scheme: dark){ header{color:#10160f} }
+  .shop{font-size:13px;opacity:.85;letter-spacing:.05em}
+  h1{margin:0;font-size:21px}
+  .updated{font-size:12px;opacity:.9}
+  main{max-width:720px;margin:0 auto;padding:12px 16px 40px}
+  .monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .monthbar h2{margin:0;font-size:19px}
+  .monthbar button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;
+    font-size:14px;border-radius:10px;padding:6px 10px;cursor:pointer}
+  .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+  .dow{text-align:center;font-size:12px;color:var(--sub);padding:2px 0}
+  .dow.sun{color:var(--sun)} .dow.sat{color:var(--sat)}
+  .day{min-width:0;min-height:54px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:3px 4px;
+    font:inherit;color:var(--ink);text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+  .day.empty{background:transparent;border:0;cursor:default}
+  .day .n{font-size:14px;font-weight:700}
+  .day.sun .n{color:var(--sun)} .day.sat .n{color:var(--sat)}
+  .day.today{outline:2px solid var(--accent)}
+  .day.sel{background:var(--accent-soft);border-color:var(--accent)}
+  .badge{align-self:flex-start;font-size:11px;font-weight:700;border-radius:999px;padding:0 7px;
+    background:var(--accent);color:#fff}
+  @media (prefers-color-scheme: dark){ .badge{color:#10160f} }
+  .badge.todo{background:var(--warn);color:#fff}
+  .legend{font-size:12px;color:var(--sub);margin:8px 0 16px;display:flex;gap:14px;flex-wrap:wrap}
+  .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+  .legend .l1::before{background:var(--warn)} .legend .l2::before{background:var(--accent)}
+  h3{font-size:17px;margin:0 0 8px}
+  .order{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .order.todo{border-left:5px solid var(--warn)}
+  .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .id{font-weight:700;font-size:16px}
+  .tags{display:flex;gap:4px;flex-wrap:wrap}
+  .tag{font-size:12px;border-radius:6px;padding:1px 8px;background:var(--accent-soft)}
+  .tag.no{background:var(--warn-soft);color:var(--warn);font-weight:700}
+  dl{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:8px 0 0;font-size:14px}
+  dt{color:var(--sub)} dd{margin:0;overflow-wrap:anywhere}
+  .none{color:var(--sub);font-size:14px}
+  .lock{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-top:20px}
+</style>
+</head>
+<body>
+<header>
+  <div class="shop">フィオーレ・サンマルコ　店内用</div>
+  <h1>注文カレンダー</h1>
+  <div class="updated" id="updated"></div>
+</header>
+<main id="main"></main>
+<script src="orders.js"></script>
+<script>
+(function(){
+  // 注文データは orders.js に暗号化して入っている。スタッフ用リンク（#k=鍵）を一度開いたスマホでだけ読める。
+  var KEY_STORE = "sanmarco-orders-key";
+  var m = location.hash.match(/[#&]k=([A-Za-z0-9_-]+)/);
+  if (m) {
+    try { localStorage.setItem(KEY_STORE, m[1]); } catch (e) {}
+    history.replaceState(null, "", location.pathname + location.search);
+  }
+  var key = m ? m[1] : null;
+  if (!key) { try { key = localStorage.getItem(KEY_STORE); } catch (e) {} }
+
+  var main = document.getElementById("main");
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  function lock(msg){ main.innerHTML = '<div class="lock">' + msg + '</div>'; }
+  function b64(s){
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+    var bin = atob(s + "===".slice((s.length + 3) % 4)), a = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+    return a;
+  }
+
+  if (!window.ORDERS) return lock("データが読み込めませんでした。");
+  document.getElementById("updated").textContent = "更新 " + ORDERS.updated;
+  if (!key) return lock("お店のスタッフ専用のページです。<br>スタッフ用のリンクから開いてください。");
+
+  var raw = b64(ORDERS.enc);
+  crypto.subtle.importKey("raw", b64(key), "AES-CBC", false, ["decrypt"])
+    .then(function(k){ return crypto.subtle.decrypt({ name: "AES-CBC", iv: raw.slice(0, 16) }, k, raw.slice(16)); })
+    .then(function(buf){ start(JSON.parse(new TextDecoder().decode(buf))); })
+    .catch(function(){ lock("鍵が古くなっています。新しいスタッフ用リンクから開き直してください。"); });
+
+  function ymd(d){ return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+
+  function start(orders){
+    var byDay = {};
+    orders.forEach(function(o){ (byDay[o.date] = byDay[o.date] || []).push(o); });
+    var today = ymd(new Date());
+    var sel = (location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2})/) || [])[1] || today;
+    var cur = new Date(sel.slice(0, 4), sel.slice(5, 7) - 1, 1);
+
+    function render(){
+      var y = cur.getFullYear(), mo = cur.getMonth();
+      var first = new Date(y, mo, 1).getDay(), days = new Date(y, mo + 1, 0).getDate();
+      var h = '<div class="monthbar"><button id="prev">‹ 前の月</button><h2>' + y + "年" + (mo + 1) + '月</h2><button id="next">次の月 ›</button></div>';
+      h += '<div class="cal">';
+      ["日","月","火","水","木","金","土"].forEach(function(w, i){ h += '<div class="dow' + (i == 0 ? " sun" : i == 6 ? " sat" : "") + '">' + w + "</div>"; });
+      for (var i = 0; i < first; i++) h += '<div class="day empty"></div>';
+      for (var d = 1; d <= days; d++) {
+        var key = ymd(new Date(y, mo, d)), list = byDay[key] || [], w = (first + d - 1) % 7;
+        var todo = list.filter(function(o){ return !o.done; }).length;
+        h += '<button class="day' + (w == 0 ? " sun" : w == 6 ? " sat" : "") + (key == today ? " today" : "") + (key == sel ? " sel" : "") +
+             '" data-d="' + key + '"><span class="n">' + d + "</span>" +
+             (list.length ? '<span class="badge' + (todo ? " todo" : "") + '">' + list.length + "件</span>" : "") + "</button>";
+      }
+      h += "</div>";
+      h += '<div class="legend"><span class="l1">まだお渡ししていない注文がある</span><span class="l2">全部お渡し済み</span></div>';
+      h += detail(sel);
+      main.innerHTML = h;
+      document.getElementById("prev").onclick = function(){ cur = new Date(y, mo - 1, 1); render(); };
+      document.getElementById("next").onclick = function(){ cur = new Date(y, mo + 1, 1); render(); };
+      Array.prototype.forEach.call(main.querySelectorAll(".day[data-d]"), function(b){
+        b.onclick = function(){
+          sel = b.getAttribute("data-d");
+          history.replaceState(null, "", location.pathname + "?d=" + sel);   // 日にちごとのリンクになる
+          render();
+          document.getElementById("detail").scrollIntoView({ behavior: "smooth", block: "start" });
+        };
+      });
+    }
+
+    function detail(day){
+      var list = byDay[day] || [], p = day.split("-");
+      var h = '<section id="detail"><h3>' + (+p[1]) + "月" + (+p[2]) + "日の注文（" + list.length + "件）</h3>";
+      if (!list.length) return h + '<p class="none">この日の注文はありません。</p></section>';
+      list.forEach(function(o){
+        h += '<div class="order' + (o.done ? "" : " todo") + '"><div class="top"><span class="id">' + esc(o.id) +
+             (o.time ? "　" + esc(o.time) : "") + '</span><span class="tags">' +
+             '<span class="tag">' + esc(o.how) + "</span>" +
+             '<span class="tag' + (o.made ? "" : " no") + '">' + (o.made ? "作製済" : "未作製") + "</span>" +
+             '<span class="tag' + (o.done ? "" : " no") + '">' + (o.done ? "お渡し済" : "未お渡し") + "</span></span></div><dl>";
+        [["形", o.form], ["目的", o.purpose], ["内容", o.content], ["連絡事項", o.note], ["合計", o.total],
+         ["支払い", o.paid], ["札・カード", o.card], ["写真", o.photo]].forEach(function(r){
+          if (r[1]) h += "<dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd>";
+        });
+        h += "</dl></div>";
+      });
+      return h + "</section>";
+    }
+    render();
+  }
+})();
+</script>
+</body>
+</html>
