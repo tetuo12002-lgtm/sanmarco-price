@@ -46,6 +46,14 @@
     background:var(--accent);color:#fff}
   @media (prefers-color-scheme: dark){ .badge{color:#10160f} }
   .badge.todo{background:var(--warn);color:#fff}
+  .filters{margin:12px 0 4px;display:flex;flex-direction:column;gap:8px}
+  .frow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .frow .fl{font-size:12px;color:var(--sub);width:4.5em;flex:none}
+  .chip{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:13px;
+    border-radius:999px;padding:4px 11px;cursor:pointer}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  @media (prefers-color-scheme: dark){ .chip.on{color:#10160f} }
+  .chip .c{font-size:11px;opacity:.75;margin-left:3px}
   .legend{font-size:12px;color:var(--sub);margin:8px 0 16px;display:flex;gap:14px;flex-wrap:wrap}
   .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
   .legend .l1::before{background:var(--warn)} .legend .l2::before{background:var(--accent)}
@@ -105,9 +113,41 @@
 
   function ymd(d){ return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
 
-  function start(orders){
-    var byDay = {};
-    orders.forEach(function(o){ (byDay[o.date] = byDay[o.date] || []).push(o); });
+  // カテゴリ（形・受け取り方）。注文書の書き方がまちまちなので、ここでまとめる。
+  var FORMS = ["アレンジ", "花束", "スタンド", "鉢物", "切り花", "その他"];
+  var HOWS = ["配達", "来店", "宅急便", "記入なし"];
+  function formOf(o){
+    var f = o.form || "";
+    if (/アレンジ/.test(f)) return "アレンジ";
+    if (/花束/.test(f)) return "花束";
+    if (/スタンド/.test(f)) return "スタンド";
+    if (/鉢/.test(f)) return "鉢物";
+    if (/切り花|花材|榊/.test(f)) return "切り花";
+    return "その他";
+  }
+  function howOf(o){
+    var h = o.how || "";
+    if (/配達/.test(h)) return "配達";
+    if (/来店/.test(h)) return "来店";
+    if (/宅急便/.test(h)) return "宅急便";
+    return "記入なし";
+  }
+  var FILTER_STORE = "sanmarco-orders-filter";
+  var fForm = "", fHow = "";
+  try { var fs = JSON.parse(localStorage.getItem(FILTER_STORE) || "{}"); fForm = fs.form || ""; fHow = fs.how || ""; } catch (e) {}
+  function saveFilter(){ try { localStorage.setItem(FILTER_STORE, JSON.stringify({ form: fForm, how: fHow })); } catch (e) {} }
+
+  function start(allOrders){
+    var byDay;
+    function regroup(){
+      byDay = {};
+      allOrders.forEach(function(o){
+        if (fForm && formOf(o) != fForm) return;
+        if (fHow && howOf(o) != fHow) return;
+        (byDay[o.date] = byDay[o.date] || []).push(o);
+      });
+    }
+    regroup();
     var today = ymd(new Date());
     var sel = (location.search.match(/[?&]d=(\d{4}-\d{2}-\d{2})/) || [])[1] || today;
     var cur = new Date(sel.slice(0, 4), sel.slice(5, 7) - 1, 1);
@@ -127,11 +167,19 @@
              (list.length ? '<span class="badge' + (todo ? " todo" : "") + '">' + list.length + "件</span>" : "") + "</button>";
       }
       h += "</div>";
+      h += filters(y, mo);
       h += '<div class="legend"><span class="l1">まだお渡ししていない注文がある</span><span class="l2">全部お渡し済み</span></div>';
       h += detail(sel);
       main.innerHTML = h;
       document.getElementById("prev").onclick = function(){ cur = new Date(y, mo - 1, 1); render(); };
       document.getElementById("next").onclick = function(){ cur = new Date(y, mo + 1, 1); render(); };
+      Array.prototype.forEach.call(main.querySelectorAll(".chip"), function(b){
+        b.onclick = function(){
+          var v = b.getAttribute("data-v");
+          if (b.getAttribute("data-k") == "form") fForm = v; else fHow = v;
+          saveFilter(); regroup(); render();
+        };
+      });
       Array.prototype.forEach.call(main.querySelectorAll(".day[data-d]"), function(b){
         b.onclick = function(){
           sel = b.getAttribute("data-d");
@@ -142,14 +190,36 @@
       });
     }
 
+    // カレンダーの下のカテゴリボタン。数字はこの月の件数（もう片方の絞り込みをかけた数）。
+    function filters(y, mo){
+      var prefix = y + "-" + ("0" + (mo + 1)).slice(-2);
+      var month = allOrders.filter(function(o){ return o.date.slice(0, 7) == prefix; });
+      function row(label, k, list, cur, of, other){
+        var base = month.filter(other);
+        var h = '<div class="frow"><span class="fl">' + label + "</span>";
+        h += '<button class="chip' + (cur ? "" : " on") + '" data-k="' + k + '" data-v="">すべて<span class="c">' + base.length + "</span></button>";
+        list.forEach(function(v){
+          var n = base.filter(function(o){ return of(o) == v; }).length;
+          if (!n && cur != v) return;   // この月に1件もない種類は出さない
+          h += '<button class="chip' + (cur == v ? " on" : "") + '" data-k="' + k + '" data-v="' + v + '">' + v + '<span class="c">' + n + "</span></button>";
+        });
+        return h + "</div>";
+      }
+      return '<div class="filters">' +
+        row("形", "form", FORMS, fForm, formOf, function(o){ return !fHow || howOf(o) == fHow; }) +
+        row("受け取り", "how", HOWS, fHow, howOf, function(o){ return !fForm || formOf(o) == fForm; }) +
+        "</div>";
+    }
+
     function detail(day){
       var list = byDay[day] || [], p = day.split("-");
-      var h = '<section id="detail"><h3>' + (+p[1]) + "月" + (+p[2]) + "日の注文（" + list.length + "件）</h3>";
+      var h = '<section id="detail"><h3>' + (+p[1]) + "月" + (+p[2]) + "日の注文（" + list.length + "件）" +
+              (fForm || fHow ? '<span class="tag">' + esc([fForm, fHow].filter(Boolean).join("・")) + "だけ表示中</span>" : "") + "</h3>";
       if (!list.length) return h + '<p class="none">この日の注文はありません。</p></section>';
       list.forEach(function(o){
         h += '<div class="order' + (o.done ? "" : " todo") + '"><div class="top"><span class="id">' + esc(o.id) +
              (o.time ? "　" + esc(o.time) : "") + '</span><span class="tags">' +
-             '<span class="tag">' + esc(o.how) + "</span>" +
+             (o.how ? '<span class="tag">' + esc(o.how) + "</span>" : "") +
              '<span class="tag' + (o.made ? "" : " no") + '">' + (o.made ? "作製済" : "未作製") + "</span>" +
              '<span class="tag' + (o.done ? "" : " no") + '">' + (o.done ? "お渡し済" : "未お渡し") + "</span></span></div><dl>";
         [["形", o.form], ["目的", o.purpose], ["内容", o.content], ["連絡事項", o.note], ["合計", o.total],
