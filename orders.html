@@ -78,7 +78,10 @@
   <div class="updated" id="updated"></div>
 </header>
 <main id="main"></main>
-<script src="orders.js"></script>
+<script>
+  // スマホに古い orders.js が残らないよう、毎回取り直す。
+  document.write('<script src="orders.js?t=' + Date.now() + '"><\/script>');
+</script>
 <script>
 (function(){
   // 注文データは orders.js に暗号化して入っている。スタッフ用リンク（#k=鍵）を一度開いたスマホでだけ読める。
@@ -108,8 +111,10 @@
   var raw = b64(ORDERS.enc);
   crypto.subtle.importKey("raw", b64(key), "AES-CBC", false, ["decrypt"])
     .then(function(k){ return crypto.subtle.decrypt({ name: "AES-CBC", iv: raw.slice(0, 16) }, k, raw.slice(16)); })
-    .then(function(buf){ start(JSON.parse(new TextDecoder().decode(buf))); })
-    .catch(function(){ lock("鍵が古くなっています。新しいスタッフ用リンクから開き直してください。"); });
+    .then(function(buf){
+      try { start(JSON.parse(new TextDecoder().decode(buf))); }
+      catch (e) { lock("表示中にエラーが出ました。ページを再読み込みしてください。<br><small>" + esc(e) + "</small>"); }
+    }, function(){ lock("鍵が古くなっています。新しいスタッフ用リンクから開き直してください。"); });
 
   function ymd(d){ return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
 
