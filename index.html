@@ -60,6 +60,18 @@
   .notice.on{background:var(--accent-soft);border-color:var(--accent);color:var(--ink)}
   .notice b{color:var(--price)}
   .empty{text-align:center;color:var(--sub);padding:40px 16px}
+  /* 写真がある花：名前を押すと写真が出る */
+  .row.has-photo{cursor:pointer}
+  .row.has-photo .name:after{content:"📷";font-size:13px;margin-left:6px;vertical-align:1px}
+  .row.has-photo:active{background:var(--accent-soft)}
+  .pv{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px}
+  .pv[hidden]{display:none}
+  .pv-box{background:var(--card);border-radius:16px;overflow:hidden;width:100%;max-width:520px;max-height:100%;display:flex;flex-direction:column;position:relative}
+  .pv-box img{width:100%;max-height:70vh;object-fit:contain;background:#000;display:block}
+  .pv-cap{padding:12px 16px 14px}
+  .pv-cap b{font-size:17px;display:block}
+  .pv-cap span{font-size:12.5px;color:var(--sub)}
+  .pv-x{position:absolute;top:8px;right:8px;width:38px;height:38px;border:0;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:22px;line-height:1;cursor:pointer}
   footer{text-align:center;font-size:11.5px;color:var(--sub);padding:0 16px 32px}
 </style>
 </head>
@@ -84,6 +96,13 @@
 </div>
 <main id="list"></main>
 <footer>入荷状況により売り切れの場合がございます。</footer>
+<div class="pv" id="pv" hidden role="dialog" aria-modal="true" aria-label="花の写真">
+  <div class="pv-box">
+    <button class="pv-x" id="pvx" type="button" aria-label="閉じる">×</button>
+    <img id="pvimg" alt="">
+    <div class="pv-cap"><b id="pvname"></b><span id="pvnote"></span></div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -165,6 +184,39 @@
 
   function esc(s){ return String(s).normalize("NFKC").replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
+  // ===== 花の写真 =====
+  // flowers.js の FLOWER_PHOTOS = {"ガーベラ": "f-xxxx.jpg", "ガーベラ シーマ": "f-yyyy.jpg", ...}（写真は flowers フォルダ）
+  // 品名＋品種の写真 → 品名の写真 → 品名に含まれる名前の写真（「バラ スタンダード」→「バラ」）の順に探す
+  var photoKeys = null;
+  var key = function(s){ return norm(s).replace(/[\s・]/g, ""); };
+  function findPhoto(name, vari){
+    if (!photoKeys) {
+      photoKeys = {};
+      var fp = window.FLOWER_PHOTOS || {};
+      Object.keys(fp).forEach(function(k){ photoKeys[key(k)] = fp[k]; });
+    }
+    var n = key(name), f;
+    if (vari && (f = photoKeys[n + key(vari)])) return { f: f, exact: true };
+    if ((f = photoKeys[n])) return { f: f };
+    var best = "";
+    Object.keys(photoKeys).forEach(function(k){ if (k.length > best.length && n.indexOf(k) >= 0) best = k; });
+    return best ? { f: photoKeys[best] } : null;
+  }
+  // 写真がある行には data-p（写真ファイル）と data-n（表示名）を付ける
+  function photoAttr(name, vari){
+    var p = findPhoto(name, vari);
+    if (!p) return "";
+    return ' has-photo" data-p="' + esc(p.f) + '" data-x="' + (p.exact ? 1 : 0) + '" data-n="' + esc(vari ? name + "　" + vari : name);
+  }
+  function openPhoto(row){
+    $("pvimg").src = "flowers/" + row.getAttribute("data-p");
+    $("pvimg").alt = row.getAttribute("data-n");
+    $("pvname").textContent = row.getAttribute("data-n");
+    $("pvnote").textContent = row.getAttribute("data-x") === "1" ? "" : "写真は同じ種類のお花の一例です。色や形は入荷によって変わります。";
+    $("pv").hidden = false;
+  }
+  function closePhoto(){ $("pv").hidden = true; $("pvimg").removeAttribute("src"); }
+
   // ===== 切花 =====
   function renderKiri(){
     var groups = [], map = {};
@@ -184,7 +236,7 @@
           if (it[2]) meta.push('<span class="color">' + esc(it[2]) + '</span>');
           if (it[3]) meta.push('<span>' + esc(it[3]) + '産</span>');
           var p = prices && prices !== "bad" && prices[it._i];   // p = [単位, 税込価格]
-          return '<div class="row"><div class="info"><div class="name">' + esc(it[1] || it[0]) + '</div>' +
+          return '<div class="row' + photoAttr(it[0], it[1]) + '"><div class="info"><div class="name">' + esc(it[1] || it[0]) + '</div>' +
             (meta.length ? '<div class="meta">' + meta.join("") + '</div>' : '') + '</div>' +
             (p ? '<div class="price"><div class="yen">¥' + Number(p[1]).toLocaleString("ja-JP") + '</div>' +
                  '<div class="unit">' + esc(p[0]) + ' 税込</div></div>' : '') + '</div>';
@@ -233,7 +285,7 @@
           var meta = [], id = careId(it);
           if (it.vari) meta.push('<span class="color">' + esc(it.vari) + '</span>');
           if (it.size) meta.push('<span>' + esc(it.size) + '</span>');
-          return '<div class="row"><div class="info"><div class="name">' + esc(it.name) + '</div>' +
+          return '<div class="row' + photoAttr(it.name, it.vari) + '"><div class="info"><div class="name">' + esc(it.name) + '</div>' +
             (meta.length ? '<div class="meta">' + meta.join("") + '</div>' : '') + '</div>' +
             (id ? '<a class="care" href="care.html?id=' + id + '">育て方 →</a>' : '') + '</div>';
         }).join("") + '</div></section>';
@@ -281,6 +333,12 @@
   });
   $("q").addEventListener("input", function(){ state.q = this.value; $("clear").style.display = this.value ? "block" : "none"; render(); });
   $("clear").addEventListener("click", function(){ $("q").value = ""; state.q = ""; this.style.display = "none"; render(); });
+  $("list").addEventListener("click", function(e){
+    if (e.target.closest("a")) return;   // 「育て方 →」はそのままリンク
+    var r = e.target.closest(".row.has-photo"); if (r) openPhoto(r);
+  });
+  $("pv").addEventListener("click", function(e){ if (e.target === this || e.target.closest(".pv-x")) closePhoto(); });
+  addEventListener("keydown", function(e){ if (e.key === "Escape" && !$("pv").hidden) closePhoto(); });
 
   // data.js（切花）と nae.js（花苗）を毎回最新で読み込む（キャッシュ回避）
   function load(src){
@@ -292,7 +350,7 @@
       document.body.appendChild(s);
     });
   }
-  Promise.all([load("data.js"), load("nae.js")]).then(function(r){
+  Promise.all([load("data.js"), load("nae.js"), load("flowers.js")]).then(function(r){
     if (!r[0]) { $("updated").textContent = "データを読み込めませんでした"; return; }
     data = window.PRICE_DATA;
     nae = loadNae();
