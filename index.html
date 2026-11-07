@@ -95,7 +95,8 @@
 <script src="seri.js"></script>
 <script>
 (function(){
-  var S=window.SERI; if(!S||!S.items||!S.items.length) return;
+  var SHOW_SERI=false; // 練習中はボタンを出さない（流れがわかったら true にする）
+  var S=window.SERI; if(!SHOW_SERI||!S||!S.items||!S.items.length) return;
   var m=(S.title||'').match(/(\d+)月(\d+)日/); if(!m) return;
   var y=Number((S.made||'').slice(0,4))||new Date().getFullYear();
   var day=new Date(y,Number(m[1])-1,Number(m[2])); var dl=new Date(day.getTime()); dl.setDate(dl.getDate()-1); dl.setHours(16,0,0,0);
