@@ -62,6 +62,9 @@
   .item:first-child{border-top:0}
   .item b{font-size:16px}
   .item p{margin:2px 0 0;font-size:14px;color:var(--sub)}
+  .gal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .gal img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block;background:var(--soft)}
+  .item .yen{color:var(--beni);font-size:15px;white-space:nowrap}
   .engi{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .engi div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
   .engi b{display:block;font-size:15px;color:var(--matsu)}
@@ -121,6 +124,16 @@
   </div>
   <p class="note">写真は以前お作りしたものです。花材の入荷状況により、内容が変わる場合があります。</p>
 
+  <h3>これまでに お作りしたもの</h3>
+  <div class="gal">
+    <img src="photos/shogatsu-g3207.jpg" alt="胡蝶蘭と松のお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3214.jpg" alt="白い胡蝶蘭と南天のお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3205.jpg" alt="松と南天・水引の大きなお正月飾り" loading="lazy">
+    <img src="photos/shogatsu-g3208.jpg" alt="葉牡丹とダリアのお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3209.jpg" alt="紫のお花と松のお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3216.jpg" alt="南天と松のお正月アレンジ" loading="lazy">
+  </div>
+
   <h3>ご注文について（会社・お店の方）</h3>
   <div class="card">
     <div class="row"><div class="ico">📅</div><div><b>締め切り：<em>12月20日（日）</em></b><span>数に限りがあります。お早めにどうぞ。</span></div></div>
@@ -136,12 +149,25 @@
   <h2 id="katei" class="mincho">ご家庭のお正月に</h2>
   <p class="lead">玄関やリビング、仏様にも。年末はお正月用のお花をたくさんそろえます。</p>
   <div class="home">
-    <div class="item"><b>🎍 お正月アレンジ</b><p>器に入って、そのまま飾れます。玄関・リビング・テーブルに。ご予算に合わせてお作りします。</p></div>
+    <div class="item"><b>🎍 お正月アレンジ　<span class="yen">2,500円〜（税別）</span></b><p>器に入って、そのまま飾れます。玄関・リビング・テーブルに。ご予算に合わせてお作りします。</p></div>
     <div class="item"><b>🌲 松・千両・南天などの枝もの</b><p>ご自宅の花器に活けたい方に。お正月用の枝ものを多めにそろえます。</p></div>
     <div class="item"><b>🌸 仏様・お墓のお花</b><p>新しい年を迎えるお供えのお花も、ご用意しています。</p></div>
     <div class="item"><b>🌿 榊（さかき）</b><p>神棚用の榊もあります。</p></div>
   </div>
-  <p class="note">年末（12月27日〜31日）はとても混み合います。アレンジはお電話か店頭でのご予約がおすすめです。</p>
+  <p class="note">年末（12月27日〜31日）はとても混み合います。アレンジはお電話か店頭でのご予約がおすすめです。<br><b>12月31日は12時までの営業です。</b></p>
+
+  <h3>ご家庭用のお正月アレンジ（これまでの例）</h3>
+  <div class="gal">
+    <img src="photos/shogatsu-g3211.jpg" alt="白い菊と松のお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3212.jpg" alt="黄色い菊と迎春の札のお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3219.jpg" alt="黄色い菊と南天のお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3215.jpg" alt="黄色とオレンジのお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3220.jpg" alt="オレンジのガーベラと扇のお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3221.jpg" alt="黄色い菊とガーベラのお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3213.jpg" alt="紫のお花と松のお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3210.jpg" alt="ピンクのガーベラのお正月アレンジ" loading="lazy">
+    <img src="photos/shogatsu-g3218.jpg" alt="南天と松のお正月の枝もの" loading="lazy">
+  </div>
 
   <h3>お正月の縁起のよいお花</h3>
   <div class="engi">
@@ -156,7 +182,7 @@
     <table>
       <tr><th>店名</th><td>フィオーレ・サンマルコ</td></tr>
       <tr><th>住所</th><td>〒063-0033<br>札幌市西区西野3条4丁目1-17<br><a href="https://www.google.com/maps/search/?api=1&query=%E3%83%95%E3%82%A3%E3%82%AA%E3%83%BC%E3%83%AC%E3%82%B5%E3%83%B3%E3%83%9E%E3%83%AB%E3%82%B3+%E6%9C%AD%E5%B9%8C%E5%B8%82%E8%A5%BF%E5%8C%BA%E8%A5%BF%E9%87%8E3%E6%9D%A14%E4%B8%81%E7%9B%AE1-17">地図を開く</a></td></tr>
-      <tr><th>営業時間</th><td>9:15〜18:00（不定休）<br>年末年始の営業はInstagramでお知らせします</td></tr>
+      <tr><th>営業時間</th><td>9:15〜18:00（不定休）<br>12月31日は12時まで。お正月の営業はInstagramでお知らせします</td></tr>
       <tr><th>電話</th><td><a href="tel:0116628125">011-662-8125</a></td></tr>
       <tr><th>FAX</th><td>011-213-8768</td></tr>
     </table>
