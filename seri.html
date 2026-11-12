@@ -36,6 +36,7 @@
   .nm{font-weight:700;font-size:15px;line-height:1.35}
   .sb{color:var(--sub);font-size:13px}
   .pr{margin-top:4px;font-size:13px;color:var(--sub)}.pr b{color:var(--price);font-size:17px}
+  .one{display:inline-block;margin-top:5px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:12.5px;border-radius:8px;padding:2px 8px}
   .empty{grid-column:1/-1;text-align:center;color:var(--sub);padding:40px 0}
   .bar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
   .bar a{display:block;text-align:center;background:var(--accent);color:#fff;text-decoration:none;font-weight:700;border-radius:12px;padding:12px;font-size:16px}
@@ -60,7 +61,7 @@
     <li>締切までに、お電話か店頭で番号と数をお伝えください</li>
     <li>落札できたら、ご連絡してお店でお渡しします</li>
   </ol>
-  <p class="note">※セリなので、落札できないこともあります。値段は目安（税抜）で、落札の値段によって変わることがあります。写真は見本です。</p>
+  <p class="note">※セリなので、落札できないこともあります。値段は目安（税抜）で、落札の値段によって変わることがあります。写真は見本です。<span id="onenote" hidden>「1鉢から予約OK」の品は箱でまとめて仕入れるので、1鉢からご予約いただけます。</span></p>
 </section>
 <main id="grid"></main>
 <div class="bar"><a id="tel" href="tel:0116628125">📞 電話で予約する<small>011-662-8125（9:15〜18:00）</small></a></div>
@@ -84,13 +85,15 @@ if(closed){
   document.querySelector('.bar').style.display='none';
 }
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+if(S.items.some(i=>i.case))document.getElementById('onenote').hidden=false;
 if(!S.items.length){g.innerHTML='<div class="empty">いまは予約できる品がありません</div>';}
 S.items.forEach(it=>{
   const c=document.createElement('div');c.className='card';
   c.innerHTML='<img loading="lazy" alt="" src="'+esc(it.photos[0])+'"><span class="no">'+it.n+'</span>'+
     (it.photos.length>1?'<span class="cnt">写真'+it.photos.length+'枚</span>':'')+
     '<div class="info"><div class="nm">'+esc(it.name)+'</div><div class="sb">'+esc([it.sub,it.size].filter(Boolean).join('　'))+'</div>'+
-    '<div class="pr">'+(it.price?'目安 <b>'+Number(it.price).toLocaleString()+'円</b>（税抜）':'値段はお問い合わせください')+'</div></div>';
+    '<div class="pr">'+(it.price?'目安 <b>'+Number(it.price).toLocaleString()+'円</b>（税抜）':'値段はお問い合わせください')+'</div>'+
+    (it.case?'<div class="one">1鉢から予約OK'+(it.iri>1?'（'+it.iri+'鉢まで）':'')+'</div>':'')+'</div>';
   c.querySelector('img').onclick=()=>{vbox.innerHTML='<div class="cap">'+it.n+'番　'+esc(it.name)+'</div>'+it.photos.map(p=>'<img alt="" src="'+esc(p)+'">').join('');viewer.style.display='block';viewer.scrollTop=0;document.body.style.overflow='hidden'};
   g.appendChild(c);
 });
