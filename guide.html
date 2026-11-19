@@ -104,6 +104,12 @@
 <script src="photos.js"></script>
 <script>
 const SHOP = "サンマルコ";
+/* ホームページから開いたとき（?from=web）は、ネットで見ている人向けの言葉にする。店頭QRは今まで通り */
+const WEB = new URLSearchParams(location.search).get("from") === "web";
+if(WEB){
+  document.querySelector("header h1").textContent = "ご注文の前に";
+  document.querySelector("footer").textContent = "わからないことは、お気軽にお電話でご相談ください。";
+}
 document.getElementById("shop").textContent = SHOP;
 
 /* 用途 */
@@ -345,7 +351,10 @@ function render(step){
   window.scrollTo(0,0);
   if(step===0){
     app.innerHTML = `
-      <p class="lead">ご来店ありがとうございます。<br>花屋がはじめてでも大丈夫です。<b>5つの質問に答えるだけ</b>で、スタッフに伝える内容がまとまります。</p>
+      ${WEB
+        ? `<p class="lead">ご注文の前に、内容をまとめておけます。<br>花屋がはじめてでも大丈夫です。<b>5つの質問に答えるだけ</b>で、お店に伝える内容がまとまります。</p>
+      <div class="note"><b>📞 ご注文はお電話・FAX・ご来店で承ります</b>このページではご注文は確定しません。できたメモを見ながら、お電話またはご来店のときにお伝えください。</div>`
+        : `<p class="lead">ご来店ありがとうございます。<br>花屋がはじめてでも大丈夫です。<b>5つの質問に答えるだけ</b>で、スタッフに伝える内容がまとまります。</p>`}
       <div class="note wait"><b>⏱ お作りするのに少しお時間をいただきます</b>花束は20分前後、アレンジは30分前後かかります。ご注文が混み合っているときは、もう少しお時間をいただく場合があります。お急ぎのときは、お電話でご予約いただくと待たずにお受け取りいただけます。</div>
       <button class="primary" onclick="go(1)">はじめる</button>
       ${extras()}`;
@@ -401,7 +410,7 @@ function render(step){
   if(step===6){
     const cs = colorList(), sc = sceneOf();
     const notes = NOTES[state.p] || [];
-    app.innerHTML = `<h2>この画面をスタッフに見せてください</h2>
+    app.innerHTML = `<h2>${WEB ? "この内容を、お電話かご来店のときにお伝えください" : "この画面をスタッフに見せてください"}</h2>
       <div class="show"><div class="cap">ご注文メモ</div><table>
         <tr><th>用途</th><td>${esc(pName())}</td></tr>
         ${sc ? `<tr><th>場面</th><td>${esc(sc.name)}</td></tr>` : ""}
@@ -409,6 +418,8 @@ function render(step){
         <tr><th>ご予算</th><td>${typeof state.b==="number" ? yen(state.b)+"くらい" : "相談したい"}</td></tr>
         <tr><th>色</th><td>${esc(cs[state.c])}</td></tr></table>
         ${typeof state.b==="number" && photosFor(state.b).length ? `<div class="ref"><img src="photos/${esc(photosFor(state.b)[0])}" alt="参考写真">${photoNo(photosFor(state.b)[0]) ? `<div><span class="refno">写真 No.${photoNo(photosFor(state.b)[0])}</span></div>` : ""}${sizeHtml(photosFor(state.b)[0])}<small>参考にした写真</small></div>` : ""}</div>
+      ${WEB ? `<div class="note"><b>このメモだけではご注文は確定しません</b>お電話のときは、上の内容（写真があれば写真の番号も）と、ご希望の日にち・お受け取り方法（ご来店／配達）をお伝えください。スクリーンショットを撮っておくと便利です。</div>
+      <div class="links"><a class="link" href="tel:0116628125"><span class="ico">📞</span><span><b>011-662-8125</b><small>タップで電話がかかります（9:15〜18:00）</small></span></a></div>` : ""}
       ${sc ? `<div class="note"><b>${esc(sc.ico)} ${esc(sc.name)}のポイント</b><ul>${sc.tips.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${notes.length ? `<div class="note"><b>${esc(pName())}で知っておくと安心なこと</b><ul>${notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${STYLES[state.s].wait ? `<div class="note wait"><b>⏱ お作りするのに ${STYLES[state.s].wait} かかります</b>ご注文をいただいてから1つずつお作りします。ご注文が混み合っているときは、もう少しお時間をいただく場合があります。お急ぎのときは、先にお電話（<a href="tel:0116628125">011-662-8125</a>）でご予約いただくと、待たずにお受け取りいただけます。</div>` : ""}
