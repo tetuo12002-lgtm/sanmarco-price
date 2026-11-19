@@ -28,7 +28,7 @@
   .steps i.on{background:var(--on-accent)}
   main{padding:8px 16px 40px;max-width:720px;margin:0 auto}
   .lead{font-size:15px;margin:14px 0 4px}
-  h2{font-size:19px;margin:18px 0 4px}
+  h2{font-size:19px;margin:18px 0 4px;scroll-margin-top:110px}
   .hint{font-size:13px;color:var(--sub);margin:0 0 10px}
   .opts{display:grid;gap:10px}
   .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:var(--ink);
@@ -299,11 +299,20 @@ const yen = n => n.toLocaleString("ja-JP") + "円";
 function steps(n){
   document.getElementById("steps").innerHTML = [1,2,3,4,5,6].map(i => `<i class="${i<=n?"on":""}"></i>`).join("");
 }
-function go(step){ history.pushState({step, ...state}, ""); render(step); }
+/* 画面を切り替えたら、いちばん上を見せる。
+   スマホ（iPhoneなど）は中身を入れ替えた後に位置がずれて、質問が上の帯に隠れることがあるので、
+   入れ替えた後にも何回か上へ戻す */
+if("scrollRestoration" in history) history.scrollRestoration = "manual";
+function toTop(){
+  const up = () => { window.scrollTo(0,0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0; };
+  up(); requestAnimationFrame(up); setTimeout(up, 60); setTimeout(up, 250);
+}
+function go(step){ if(document.activeElement) document.activeElement.blur(); history.pushState({step, ...state}, ""); render(step); toTop(); }
 window.addEventListener("popstate", e => {
   const st = e.state || {step:0};
   Object.assign(state, {p:st.p||null, sc:st.sc||null, s:st.s||null, b:st.b||null, c:st.c ?? null});
   render(st.step || 0);
+  toTop();
 });
 function back(){ history.back(); }
 const pName = () => PURPOSES.find(x => x.id===state.p).name;
