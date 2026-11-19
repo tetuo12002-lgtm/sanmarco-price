@@ -43,6 +43,24 @@
   dt::before{content:"■ "}
   dd{margin:0}
   footer{text-align:center;font-size:11.5px;color:var(--sub);padding:0 16px 32px}
+  /* 一覧で開いたときの説明・目次 */
+  .intro{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:16px;font-size:15px}
+  .intro p{margin:0}
+  .sec{font-size:17px;margin:22px 0 0;padding-left:10px;border-left:4px solid var(--accent)}
+  .toc{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .toc a{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:10px 12px;color:var(--ink);text-decoration:none;font-weight:700;font-size:15px;min-width:0}
+  .toc a i{flex:none;width:12px;height:12px;border-radius:50%;background:var(--c)}
+  .toc a span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .basics{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 16px 12px;margin-top:10px}
+  .basics dt{color:var(--accent)} @media (prefers-color-scheme: dark){ .basics dt{color:var(--ink)} }
+  .basics dl{padding:0}
+  .go{display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--accent);border-radius:14px;
+    padding:14px 16px;margin-top:16px;color:var(--ink);text-decoration:none}
+  .go .ico{font-size:28px;flex:none}
+  .go b{display:block;font-size:16px}
+  .go small{display:block;color:var(--sub);font-size:13px}
+  .go .arr{margin-left:auto;font-size:20px;color:var(--accent)}
 </style>
 </head>
 <body>
@@ -255,7 +273,24 @@ if (only) document.title = SHOP + " " + only.name + "の育て方";
 document.getElementById("chips").innerHTML = only
   ? `<a class="chip" href="care.html">ほかの花の育て方も見る</a>`
   : flowers.map(f => `<a class="chip" href="#${f.id}">${esc(f.name)}</a>`).join("");
-document.getElementById("list").innerHTML = shown.map(f => `
+/* 最新入荷の花の「花苗・鉢物」へのリンク */
+const NAE_LINK = `<a class="go" href="index.html?t=nae"><span class="ico">🌱</span><span><b>いま入荷している花苗・鉢物を見る</b><small>最新入荷の花のページ。お値段と入荷日がわかります。「育て方 →」からこのページに戻れます</small></span><span class="arr">›</span></a>`;
+/* 一覧で開いたときだけ、上にこのページの説明・目次・育て方の基本を出す */
+const INTRO = only ? "" : `
+  <section class="intro"><p>サンマルコで販売している<b>鉢花・花苗の育て方</b>をまとめたページです。下の一覧から、お持ちの花の名前を選んでください。<br>
+  <span style="color:var(--sub);font-size:13.5px">お花の値札のQRコードから開いたときは、その花の育て方だけが出ます。</span></p></section>
+  <h2 class="sec">育て方を見る花をえらぶ（${flowers.length}種類）</h2>
+  <nav class="toc">${flowers.map(f => `<a href="#${f.id}" style="--c:${f.color}"><i></i><span>${esc(f.name)}</span></a>`).join("")}</nav>
+  <h2 class="sec">どの花にも共通する基本</h2>
+  <div class="basics"><dl>
+    <dt>水やり</dt><dd>土の表面が乾いてから、鉢の底から流れ出るまでたっぷり。受け皿にたまった水は捨てます（根腐れを防ぐため）。</dd>
+    <dt>置き場所</dt><dd>多くの花は、明るくて風通しのよい場所が好きです。暖房やエアコンの風が直接当たる場所は避けます。</dd>
+    <dt>北海道の冬</dt><dd>寒さに弱い花は、夜の窓際の冷え込みにも注意して、部屋の内側へ。お持ち帰りのときは、冷たい外気に当てないよう包みます。</dd>
+    <dt>咲き終わった花</dt><dd>こまめに摘むと、次の花が咲きやすく、病気も防げます。</dd>
+  </dl></div>
+  ${NAE_LINK}
+  <h2 class="sec">花ごとの育て方</h2>`;
+document.getElementById("list").innerHTML = INTRO + shown.map(f => `
   <article class="card" id="${f.id}" style="--c:${f.color}">
     <div class="head">
       <div class="kind">${esc(f.kind)}</div>
@@ -268,7 +303,7 @@ document.getElementById("list").innerHTML = shown.map(f => `
       <div class="badge">寒さ<b>${esc(f.cold)}</b></div>
     </div>
     <dl>${f.care.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
-  </article>`).join("");
+  </article>`).join("") + (only ? NAE_LINK + `<a class="go" href="care.html"><span class="ico">🪴</span><span><b>ほかの花の育て方を見る</b><small>${flowers.length}種類の鉢花・花苗の育て方</small></span><span class="arr">›</span></a>` : NAE_LINK);
 </script>
 </body>
 </html>

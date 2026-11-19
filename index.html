@@ -291,9 +291,13 @@
     var p = d.split("-"), dt = new Date(+p[0], +p[1] - 1, +p[2]);
     return (+p[1]) + "月" + (+p[2]) + "日（" + "日月火水木金土".charAt(dt.getDay()) + "）入荷";
   }
+  // 花苗・鉢物の下に、育て方のページ（一覧）へのリンク
+  var CARE_ALL = '<a href="care.html" style="display:flex;align-items:center;gap:12px;margin:18px 16px 0;padding:14px 16px;border:2px solid var(--accent);border-radius:14px;background:var(--card);color:var(--ink);text-decoration:none">' +
+    '<span style="font-size:28px">🪴</span><span style="flex:1"><b style="display:block;font-size:16px">鉢花・花苗の育て方をまとめて見る</b>' +
+    '<small style="color:var(--sub);font-size:13px">水やり・置き場所・北海道の冬越しなど</small></span><span style="font-size:20px;color:var(--accent)">›</span></a>';
   function renderNae(){
     if (!nae.length) {
-      $("list").innerHTML = '<div class="empty">ここ3週間の花苗・鉢物の入荷はありません。<br>入荷しだい、こちらでお知らせします。</div>';
+      $("list").innerHTML = '<div class="empty">ここ3週間の花苗・鉢物の入荷はありません。<br>入荷しだい、こちらでお知らせします。</div>' + CARE_ALL;
       return;
     }
     var groups = [], map = {};
@@ -315,7 +319,7 @@
             (id ? '<a class="care" href="care.html?id=' + id + '">育て方 →</a>' : '') + '</div>';
         }).join("") + '</div></section>';
     }).join("");
-    $("list").innerHTML = html || '<div class="empty">該当する苗が見つかりません</div>';
+    $("list").innerHTML = (html || '<div class="empty">該当する苗が見つかりません</div>') + CARE_ALL;
   }
 
   function render(){ if (state.tab === "nae") renderNae(); else renderKiri(); }
