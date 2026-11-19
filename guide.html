@@ -456,6 +456,21 @@ const SOUGI_OFF = "お休みの日・営業時間（9:15〜18:00）外のご注�
 function sougiTel(){
   return `<div class="links"><a class="link" href="tel:0116628125"><span class="ico">📞</span><span><b>011-662-8125</b><small>タップで電話がかかります（9:15〜18:00）</small></span></a></div>`;
 }
+/* 立札のお名前を、そのままメールで送る（漢字の間違いを防ぐため） */
+function sougiMail(){
+  const v = id => (document.getElementById(id) || {}).value || "";
+  const name = v("sg4").trim();
+  if(!name){ alert("立札に書くお名前を、上の欄に書いてください。"); document.getElementById("sg4").focus(); return; }
+  const body = ["フィオーレ・サンマルコ 御中", "ご葬儀のお花の、立札のお名前を送ります。", "",
+    "■立札のお名前：", name, "",
+    "■斎場：" + v("sg1").trim(),
+    "■お通夜・告別式の日時：" + v("sg2").trim(),
+    "■故人のお名前・○○家：" + v("sg3").trim(), "",
+    "■ご注文者のお名前：",
+    "■お電話番号：", "",
+    "※ご注文は、先にお電話でお願いします。"].join("\n");
+  location.href = `mailto:${ORDER_MAIL}?subject=${encodeURIComponent("【ご葬儀】立札のお名前" + (v("sg3").trim() ? "（" + v("sg3").trim() + "）" : ""))}&body=${encodeURIComponent(body)}`;
+}
 function sougiQuick(){
   return `<div class="note wait" style="margin-top:14px"><b>🕯️ ご葬儀のお花は、当日・翌日でも承ります</b>${SOUGI_TIME}
     <br>お急ぎのときは、このままお電話ください。</div>${sougiTel()}`;
@@ -466,11 +481,14 @@ function sougiBox(){
   return `<div class="order"><b>📞 ご葬儀のお花は、お電話でご注文ください</b>
     <p style="margin:6px 0 0;font-size:14px">${SOUGI_TIME}</p>
     ${sougiTel()}
-    <p style="margin:12px 0 0;font-size:14px"><b>お電話の前に、分かるところだけメモしておくと早く済みます</b>（このメモはお店には送られません）</p>
+    <p style="margin:12px 0 0;font-size:14px"><b>お電話の前に、分かるところだけメモしておくと早く済みます</b>（下のメールのボタンを押さない限り、お店には送られません）</p>
     ${f("sg1","斎場の名前（ご自宅のときは住所）","例：○○斎場 ○○ホール")}
     ${f("sg2","お通夜・告別式の日時","例：11月20日 18時からお通夜")}
     ${f("sg3","故人のお名前・喪主様（○○家）","例：○○家")}
-    ${f("sg4","立札に書くお名前","例：株式会社○○ 代表取締役 ○○／孫一同")}
+    <label style="display:block;margin-top:8px;font-size:13px;color:var(--sub)">立札に書くお名前（連名のときは改行して書けます）
+    <textarea id="sg4" rows="3" placeholder="例：株式会社○○&#10;代表取締役 ○○ ○○" style="display:block;width:100%;margin-top:2px;font:inherit;font-size:16px;padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)"></textarea></label>
+    <div class="note" style="margin-top:10px"><b>✉️ 立札のお名前は、メールでも送ってください</b>漢字の書き間違いを防ぐため、お電話のあとに、立札のお名前をそのままメールでお送りください。上の欄に書いてからボタンを押すと、メールが開きます。</div>
+    <div class="links"><a class="link" href="#" onclick="sougiMail();return false"><span class="ico">✉️</span><span><b>立札のお名前をメールで送る</b><small>${ORDER_MAIL} あて</small></span></a></div>
     <div class="note" style="margin-top:12px"><b>斎場への持込料について</b><ul>
       <li>斎場によって持込料がかかります：やわらぎ 600円、ベルコ・ファミーユ 500円（税込）</li>
       <li>お花が <b style="display:inline">7,000円（税別）以上</b>のときは、持込料はお店が負担します</li>
