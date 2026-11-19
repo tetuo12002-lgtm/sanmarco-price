@@ -453,7 +453,7 @@ function render(step){
    ご希望日が「今日から3日後」以降 → メール（注文フォームを公開したらフォームも）
    それより前 → お電話 */
 const ORDER_DAYS = 3;                                  // 何日後からメール・フォームで受けるか
-const ORDER_MAIL = "marco@sunmarco.xsrv.jp";           // メールの送り先
+const ORDER_MAIL = "chumon@sunmarco.xsrv.jp";           // メールの送り先
 const ORDER_FORM_URL = "";                             // 注文フォームを公開したら、そのページのURLを入れる（空ならメールだけ）
 const WD = ["日","月","火","水","木","金","土"];
 function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
