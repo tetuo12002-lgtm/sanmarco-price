@@ -12,7 +12,8 @@
      "sonae-arrange-5000": ["sonae-arrange-5000-1.jpg"],
 */
 window.PHOTOS = {
-  "oiwai-arrange-5000": ["oiwai-arrange-5000-1.jpg", "oiwai-arrange-5000-2.jpg"],
+  /* 2026-11-19 外した（かわいくないので）。戻すときはこの行と、次の行の最後の */ を消す
+  "oiwai-arrange-5000": ["oiwai-arrange-5000-1.jpg", "oiwai-arrange-5000-2.jpg"], */
   "sonae-arrange-5000": ["sonae-arrange-5000-1.jpg", "sonae-arrange-5000-2.jpg"],
 };
 
