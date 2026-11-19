@@ -216,7 +216,7 @@ const STYLES = {
   arrange:  {ico:"🧺", name:"アレンジ",   sub:"かごに挿してあるので、花瓶なしでそのまま飾れます（お作りに30分前後）", wait:"30分前後"},
   butsuka:  {ico:"🪷", name:"仏花（1対）", sub:"お墓・お仏壇に左右一対で供える束"},
   hachi:    {ico:"🪴", name:"鉢花",       sub:"根があるので長く楽しめます"},
-  stand:    {ico:"🏵️", name:"スタンド花", sub:"斎場に飾る、脚の付いた大きなお花。1段 15,000円・2段 20,000円（税別）。持込料・配達料はかかりません"},
+  stand:    {ico:"🏵️", name:"スタンド花", sub:"斎場に飾る、脚の付いた大きなお花。1段 15,000円・2段 20,000円（税別）。色・デザインはおまかせ。持込料・配達料はかかりません"},
   omakase:  {ico:"🙋", name:"決まっていない", sub:"スタッフと相談して決めます"},
 };
 
@@ -420,11 +420,11 @@ function render(step){
     return;
   }
   if(step===4 && state.s==="stand"){
-    app.innerHTML = `<h2>④ 何段にしますか？</h2><p class="hint">スタンド花は、持込料も配達料もお店が負担します。</p>
+    app.innerHTML = `<h2>④ 何段にしますか？</h2><p class="hint">スタンド花は、色やデザインは<b style="display:inline">すべておまかせ</b>でお作りします。<br>持込料も配達料もお店が負担します。</p>
       <div class="opts">${STAND.map(x => `
-        <button class="opt" onclick="state.b=${x.b};go(5)"><span class="ico">🏵️</span>
+        <button class="opt" onclick="state.b=${x.b};state.c=0;go(6)"><span class="ico">🏵️</span>
         <span><b>${x.n}　${yen(x.zei)}（税別）</b><small>税込 ${yen(x.b)}</small></span></button>`).join("")}
-        <button class="opt" onclick="state.b='相談';go(5)"><span class="ico">💬</span><span><b>相談したい</b><small>段数や大きさをお店と決めます</small></span></button></div>
+        <button class="opt" onclick="state.b='相談';state.c=0;go(6)"><span class="ico">💬</span><span><b>相談したい</b><small>段数や大きさをお店と決めます</small></span></button></div>
       <button class="back" onclick="back()">← もどる</button>`;
     return;
   }
