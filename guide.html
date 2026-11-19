@@ -174,7 +174,8 @@ const SCENES = {
   sonae: [
     {id:"sougi",   ico:"🕯️", name:"ご葬儀（通夜・告別式）", sub:"斎場・ご自宅へ", rec:["arrange"],
       colors:["おまかせ","白・グリーン中心","白に淡い色を少し"],
-      tips:["名札（立札）を付けられます。贈り主のお名前をお伝えください","斎場へ届ける場合は、斎場名・故人のお名前・日時をお知らせください"]},
+      tips:["名札（立札）を付けられます。贈り主のお名前をお伝えください","斎場へ届ける場合は、斎場名・故人のお名前・日時をお知らせください",
+            "斎場によって持込料がかかります（やわらぎ 600円、ベルコ・ファミーユ 500円、税込）。お花が7,000円（税別）以上なら、お店が負担します"]},
     {id:"houyou",  ico:"📿", name:"四十九日・一周忌などの法要", sub:"お寺・ご自宅へ", rec:["arrange","hanataba"],
       tips:["四十九日を過ぎたら、淡い色を入れることもあります","故人の好きだった花や色でお作りすることもできます"]},
     {id:"ohaka",   ico:"🪦", name:"お墓参り・お盆・お彼岸", sub:"お墓に供える", rec:["butsuka"],
@@ -402,7 +403,7 @@ function render(step){
     const sc = sceneOf(), rec = sc ? sc.rec : [];
     const order = [...rec, ...STYLE_BY_PURPOSE[state.p].filter(k => !rec.includes(k))];
     if(!order.includes("omakase")) order.push("omakase");
-    app.innerHTML = `<h2>③ どんな形にしますか？</h2><p class="hint">${esc(sc ? sc.name : pName())}には、こんな形があります。</p>
+    app.innerHTML = `${WEB && state.sc==="sougi" ? sougiQuick() : ""}<h2>③ どんな形にしますか？</h2><p class="hint">${esc(sc ? sc.name : pName())}には、こんな形があります。</p>
       <div class="opts">${order.map(k => { const x = STYLES[k]; return `
         <button class="opt" onclick="state.s='${k}';go(4)"><span class="pic">${PICS[k]||x.ico}</span>
         <span><b>${x.name}</b><small>${WEB ? x.sub.replace(/（お作りに[^）]*）/, "") : x.sub}</small></span>${rec.includes(k)?'<span class="tag">おすすめ</span>':""}</button>`; }).join("")}</div>
@@ -438,15 +439,43 @@ function render(step){
         <tr><th>ご予算</th><td>${typeof state.b==="number" ? yen(state.b)+"くらい" : "相談したい"}</td></tr>
         <tr><th>色</th><td>${esc(cs[state.c])}</td></tr></table>
         ${typeof state.b==="number" && photosFor(state.b).length ? `<div class="ref"><img src="photos/${esc(photosFor(state.b)[0])}" alt="参考写真">${photoNo(photosFor(state.b)[0]) ? `<div><span class="refno">写真 No.${photoNo(photosFor(state.b)[0])}</span></div>` : ""}${sizeHtml(photosFor(state.b)[0])}<small>参考にした写真</small></div>` : ""}</div>
-      ${WEB ? `<div class="order"><b>📅 お届け・お受け取りのご希望日は？</b>
+      ${WEB && state.sc==="sougi" ? sougiBox() : WEB ? `<div class="order"><b>📅 お届け・お受け取りのご希望日は？</b>
         <input type="date" id="wantDate" oninput="orderNext()" onchange="orderNext()">
         <div id="orderNext"><p class="hint" style="margin:8px 0 0">日にちを選ぶと、ご注文の方法をご案内します。</p></div></div>` : ""}
-      ${sc ? `<div class="note"><b>${esc(sc.ico)} ${esc(sc.name)}のポイント</b><ul>${sc.tips.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
+      ${sc ? `<div class="note"><b>${esc(sc.ico)} ${esc(sc.name)}のポイント</b><ul>${sc.tips.filter(n => !(WEB && state.sc==="sougi" && n.includes("持込料"))).map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${notes.length ? `<div class="note"><b>${esc(pName())}で知っておくと安心なこと</b><ul>${notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul></div>` : ""}
       ${STYLES[state.s].wait && !WEB ? `<div class="note wait"><b>⏱ お作りするのに ${STYLES[state.s].wait} かかります</b>ご注文をいただいてから1つずつお作りします。ご注文が混み合っているときは、もう少しお時間をいただく場合があります。お急ぎのときは、先にお電話（<a href="tel:0116628125">011-662-8125</a>）でご予約いただくと、待たずにお受け取りいただけます。</div>` : ""}
       <button class="primary" onclick="history.go(-6)">最初からやり直す</button>
       ${extras()}`;
   }
+}
+
+/* ===== ご葬儀（通夜・告別式）は当日・翌日が多いので、お電話へ案内する（WEBのときだけ） ===== */
+const SOUGI_TIME = "当日のご注文も、<b style=\"display:inline\">午前中のお電話</b>ならたいてい間に合います。ただ、西区以外の斎場で夕方早め（16時ごろ）のお通夜・ご焼香のときは、間に合わないことがあります。お早めにお電話ください。";
+const SOUGI_OFF = "お休みの日・営業時間（9:15〜18:00）外のご注文は、配達の予定を確かめてから、お電話でお返事します。";
+function sougiTel(){
+  return `<div class="links"><a class="link" href="tel:0116628125"><span class="ico">📞</span><span><b>011-662-8125</b><small>タップで電話がかかります（9:15〜18:00）</small></span></a></div>`;
+}
+function sougiQuick(){
+  return `<div class="note wait" style="margin-top:14px"><b>🕯️ ご葬儀のお花は、当日・翌日でも承ります</b>${SOUGI_TIME}
+    <br>お急ぎのときは、このままお電話ください。</div>${sougiTel()}`;
+}
+function sougiBox(){
+  const f = (id, label, ph) => `<label style="display:block;margin-top:8px;font-size:13px;color:var(--sub)">${label}
+    <input id="${id}" placeholder="${ph}" style="display:block;width:100%;margin-top:2px;font:inherit;font-size:16px;padding:9px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)"></label>`;
+  return `<div class="order"><b>📞 ご葬儀のお花は、お電話でご注文ください</b>
+    <p style="margin:6px 0 0;font-size:14px">${SOUGI_TIME}</p>
+    ${sougiTel()}
+    <p style="margin:12px 0 0;font-size:14px"><b>お電話の前に、分かるところだけメモしておくと早く済みます</b>（このメモはお店には送られません）</p>
+    ${f("sg1","斎場の名前（ご自宅のときは住所）","例：○○斎場 ○○ホール")}
+    ${f("sg2","お通夜・告別式の日時","例：11月20日 18時からお通夜")}
+    ${f("sg3","故人のお名前・喪主様（○○家）","例：○○家")}
+    ${f("sg4","立札に書くお名前","例：株式会社○○ 代表取締役 ○○／孫一同")}
+    <div class="note" style="margin-top:12px"><b>斎場への持込料について</b><ul>
+      <li>斎場によって持込料がかかります：やわらぎ 600円、ベルコ・ファミーユ 500円（税込）</li>
+      <li>お花が <b style="display:inline">7,000円（税別）以上</b>のときは、持込料はお店が負担します</li>
+      <li>ほかの斎場では、スタンド花だけ持込料がかかる場合などがあります。ご注文のときにお知らせします</li></ul></div>
+    <p class="hint" style="margin:8px 0 0">${SOUGI_OFF}</p></div>`;
 }
 
 /* ===== ホームページから来た人の注文（WEBのときだけ） =====
