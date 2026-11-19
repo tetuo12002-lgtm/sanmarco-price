@@ -501,19 +501,14 @@ function orderNext(){
   const body = ["フィオーレ・サンマルコ 御中", "ホームページの注文メモから送ります。", "",
     ...memoLines().map(s => "■" + s),
     `■ご希望日：${y}年${jpDate(date)}`,
-    "■ご希望の時間：",
-    "■受け取り方：お店で受け取る ／ 配達してほしい（どちらか残してください）",
-    "■お届け先（配達のとき）：お名前・ご住所・お電話番号",
-    "■メッセージカード・立札（いる場合は書く文も）：",
-    "■ご注文される方のお名前：",
-    "■お電話番号：",
-    "■そのほかご希望：", "",
-    "※お店から確認のご連絡をして、ご注文が確定します。"].join("\n");
+    "", "■お名前：",
+    "■お電話番号：", "",
+    "※お店からお電話して、受け取り方・お届け先などを確認してから、ご注文が確定します。"].join("\n");
   const subject = `ご注文のご相談（${m}/${d} ${STYLES[state.s].name} ${typeof state.b==="number" ? yen(state.b) : "予算は相談"}）`;
   const mail = `mailto:${ORDER_MAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   box.innerHTML = `<div class="note"><b>✉️ ${jpDate(date)}のご注文は、ネットで承れます</b>
-      ${ORDER_FORM_URL ? "注文フォームに、このメモの内容が入った状態で開きます。お名前などを足して送ってください。" : "ボタンを押すと、このメモの内容が入ったメールが開きます。空いているところを書き足して送ってください。"}
-      お店から確認のご連絡をして、ご注文が確定します。</div>
+      ${ORDER_FORM_URL ? "注文フォームに、このメモの内容が入った状態で開きます。お名前などを足して送ってください。" : "ボタンを押すと、このメモの内容が入ったメールが開きます。<b style=\"display:inline\">お名前とお電話番号だけ</b>書いて送ってください。お届け先などは、お店からお電話して伺います。"}
+      ${ORDER_FORM_URL ? "お店から確認のご連絡をして、ご注文が確定します。" : "確認のお電話のあとで、ご注文が確定します。"}</div>
     <div class="links">
       ${ORDER_FORM_URL ? `<a class="link" href="${esc(ORDER_FORM_URL)}?${esc(formParams(date))}"><span class="ico">📝</span><span><b>この内容で注文フォームへ</b><small>お名前・お届け先などを足して送ります</small></span></a>` : ""}
       <a class="link" href="${esc(mail)}"><span class="ico">✉️</span><span><b>この内容でメールする</b><small>${ORDER_MAIL} あて</small></span></a>
