@@ -16,6 +16,8 @@
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
+  /* 上へ戻るときに「引っぱって更新」が起きにくくする */
+  html,body{overscroll-behavior-y:none}
   body{margin:0;background:var(--bg);color:var(--ink);
     font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","BIZ UDPGothic","Yu Gothic UI","Meiryo",sans-serif;
     line-height:1.6}
@@ -552,8 +554,15 @@ function extras(){
       <ul><li>現金</li><li>クレジットカード</li><li>Airペイ</li><li>QUICPay（クイックペイ）</li></ul></div></details>`;
 }
 
-history.replaceState({step:0}, "");
-render(0);
+/* 途中で更新（引っぱって更新など）されても、選んだところから続ける */
+const saved = history.state;
+if(saved && saved.step){
+  Object.assign(state, {p:saved.p||null, sc:saved.sc||null, s:saved.s||null, b:saved.b||null, c:saved.c ?? null});
+  render(saved.step);
+}else{
+  history.replaceState({step:0}, "");
+  render(0);
+}
 </script>
 </body>
 </html>
