@@ -72,6 +72,8 @@
   .lb img{max-width:100%;max-height:calc(100vh - 170px);border-radius:8px;object-fit:contain}
   .lb .cap{color:#fff;text-align:center;margin-top:12px;font-size:15px}
   .lb .yen2{font-size:24px;font-weight:700;color:#ffd98a;margin:2px 0 4px}
+  .lb .lbbtn{display:inline-block;margin:10px 0 6px;background:#fff;color:#8c1822;font-weight:700;border-radius:99px;padding:10px 22px;text-decoration:none;font-size:16px}
+  .closed-note{background:#fff4f4;border:1px solid #e3b6ba;border-radius:12px;padding:12px 14px;font-size:14px;margin-top:10px}
   .lb .cap b{display:inline-block;background:#b5232f;border-radius:20px;padding:2px 14px;font-size:20px;margin-bottom:4px}
   .lb .x{position:absolute;top:calc(10px + env(safe-area-inset-top));right:12px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:26px;cursor:pointer}
   .lb .nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:64px;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:30px;cursor:pointer;border-radius:8px}
@@ -142,7 +144,7 @@
   <p class="note">写真は以前お作りしたものです。花材の入荷状況により、内容が変わる場合があります。</p>
 
   <h3>これまでに お作りしたもの</h3>
-  <p class="hint">写真をタップすると、大きな写真とそのときのお値段が見られます。過去の作品のため同じ花材はなく、<b>雰囲気を合わせたお任せ</b>でお作りします。お電話で「写真○番のような感じで」とお伝えください。</p>
+  <p class="hint">写真をタップすると、大きな写真とそのときのお値段が見られます。過去の作品のため同じ花材はなく、<b>雰囲気を合わせたお任せ</b>でお作りします。写真を開くと、その写真でネット注文もできます。お電話なら「写真○番のような感じで」とお伝えください。</p>
   <div class="gal">
     <button type="button" class="gp" data-n="1" data-price="10,000" data-big="photos/shogatsu-L3207.jpg"><img src="photos/shogatsu-g3207.jpg" alt="胡蝶蘭と松のお正月アレンジ" loading="lazy"><span class="no">1</span></button>
     <button type="button" class="gp" data-n="2" data-price="10,000" data-big="photos/shogatsu-L3214.jpg"><img src="photos/shogatsu-g3214.jpg" alt="白い胡蝶蘭と南天のお正月アレンジ" loading="lazy"><span class="no">2</span></button>
@@ -160,6 +162,7 @@
     <div class="row"><div class="ico">🧾</div><div><b>請求書でのお支払いOK</b><span>法人様は請求書払いができます。</span></div></div>
   </div>
   <div class="btns">
+    <a class="btn netorder" data-t="h" href="#">ネットで注文する<small>ご注文フォームへ（写真の番号は、写真を開いて選べます）</small></a>
     <a class="btn" href="tel:0116628125">電話で注文する<small>011-662-8125（9:15〜18:00）</small></a>
     <a class="btn sub" href="shogatsu-fax.pdf">FAX注文用紙（PDF）を開く<small>印刷して FAX 011-213-8768 へ</small></a>
   </div>
@@ -179,7 +182,7 @@
   <p class="note">年末（12月27日〜31日）はとても混み合います。アレンジはお電話か店頭でのご予約がおすすめです。<br>配達はお花代3,000円（税別）から。西区は配達無料、そのほかの札幌市内は500円（税込）です。<br><b>12月31日は12時までの営業です。</b></p>
 
   <h3>ご家庭用のお正月アレンジ（これまでの例）</h3>
-  <p class="hint">写真をタップすると、大きな写真とそのときのお値段が見られます。過去の作品のため同じ花材はなく、<b>雰囲気を合わせたお任せ</b>でお作りします。ご注文のときは写真の番号をお伝えください。</p>
+  <p class="hint">写真をタップすると、大きな写真とそのときのお値段が見られます。過去の作品のため同じ花材はなく、<b>雰囲気を合わせたお任せ</b>でお作りします。写真を開くと、その写真でネット注文もできます。</p>
   <div class="gal">
     <button type="button" class="gp" data-n="7" data-price="3,000" data-big="photos/shogatsu-L3205.jpg"><img src="photos/shogatsu-g3205.jpg" alt="松と南天・水引の大きなお正月飾り" loading="lazy"><span class="no">7</span></button>
     <button type="button" class="gp" data-n="8" data-price="3,000" data-big="photos/shogatsu-L3211.jpg"><img src="photos/shogatsu-g3211.jpg" alt="白い菊と松のお正月アレンジ" loading="lazy"><span class="no">8</span></button>
@@ -191,6 +194,11 @@
     <button type="button" class="gp" data-n="14" data-price="3,000" data-big="photos/shogatsu-L3213.jpg"><img src="photos/shogatsu-g3213.jpg" alt="紫のお花と松のお正月アレンジ" loading="lazy"><span class="no">14</span></button>
     <button type="button" class="gp" data-n="15" data-price="3,000" data-big="photos/shogatsu-L3210.jpg"><img src="photos/shogatsu-g3210.jpg" alt="ピンクのガーベラのお正月アレンジ" loading="lazy"><span class="no">15</span></button>
     <button type="button" class="gp" data-n="16" data-price="2,500" data-big="photos/shogatsu-L3218.jpg"><img src="photos/shogatsu-g3218.jpg" alt="黄色い菊と南天・迎春の札のお正月アレンジ" loading="lazy"><span class="no">16</span></button>
+  </div>
+
+  <div class="btns">
+    <a class="btn netorder" data-t="k" href="#">ネットで注文する<small>ご注文フォームへ（写真の番号は、写真を開いて選べます）</small></a>
+    <a class="btn sub" href="tel:0116628125">電話で注文する<small>011-662-8125（9:15〜18:00）</small></a>
   </div>
 
   <h3>お正月の縁起のよいお花</h3>
@@ -222,7 +230,7 @@
   <button class="nav pv" type="button" aria-label="前の写真">‹</button>
   <img id="lbimg" alt="">
   <button class="nav nx" type="button" aria-label="次の写真">›</button>
-  <div class="cap"><b id="lbno"></b><div class="yen2" id="lbyen"></div>お電話（011-662-8125）で「<span id="lbno2"></span>」とお伝えください<br><small>※過去の作品です。同じ花材はないため、雰囲気を合わせたお任せでのお作りになります</small></div>
+  <div class="cap"><b id="lbno"></b><div class="yen2" id="lbyen"></div><a class="lbbtn" id="lbform" href="#">この写真でネット注文する ›</a><br>お電話（011-662-8125）なら「<span id="lbno2"></span>」とお伝えください<br><small>※過去の作品です。同じ花材はないため、雰囲気を合わせたお任せでのお作りになります</small></div>
 </div>
 <script>
 (function(){
@@ -234,6 +242,26 @@
   lb.querySelector(".nx").onclick=function(e){e.stopPropagation();show(cur+1);};
   lb.addEventListener("click",function(e){if(e.target===lb)lb.classList.remove("on");});
   document.addEventListener("keydown",function(e){if(!lb.classList.contains("on"))return;if(e.key==="Escape")lb.classList.remove("on");if(e.key==="ArrowLeft")show(cur-1);if(e.key==="ArrowRight")show(cur+1);});
+  /* ネット注文：ホームページのご注文フォームへ。写真の番号とお値段をメモ欄に入れる。
+     t … h＝会社・お店（お届けは12月28日まで）、k＝ご家庭。締め切りを過ぎたらボタンを隠して電話へ */
+  var FORM="https://sunmarco.xsrv.jp/wp/%e3%81%94%e6%b3%a8%e6%96%87%e3%83%95%e3%82%a9%e3%83%bc%e3%83%a0/";
+  var LAST="2026-12-20";
+  function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
+  function formUrl(t,n,price){
+    var memo="【お正月のお花】"+(t==="h"?"会社・お店用":"ご家庭用")+(n?"　写真"+n+"番（"+price+"円・税別）のような感じで":"");
+    var q="purpose="+encodeURIComponent("その他")+"&style="+encodeURIComponent("アレンジメント")+"&shogatsu="+t+(n?"&photo="+n+"&price="+encodeURIComponent(price):"")+"&memo="+encodeURIComponent(memo);
+    return FORM+"?"+q;
+  }
+  var closed=today()>LAST;
+  [].forEach.call(document.querySelectorAll(".netorder"),function(a){
+    if(closed){var p=document.createElement("p");p.className="closed-note";p.textContent="ネットでのお正月のご注文は、12月20日で締め切りました。お電話でご相談ください。";a.parentNode.insertBefore(p,a);a.style.display="none";return;}
+    a.href=formUrl(a.dataset.t,null,null);
+  });
+  var lf=document.getElementById("lbform");
+  var _show=show;show=function(i){_show(i);var p=ps[cur];
+    if(closed){lf.style.display="none";return;}
+    lf.href=formUrl(+p.dataset.n<=6?"h":"k",p.dataset.n,p.dataset.price);};
+  lf.addEventListener("click",function(e){e.stopPropagation();});
   var sx=null;lb.addEventListener("touchstart",function(e){sx=e.touches[0].clientX;},{passive:true});
   lb.addEventListener("touchend",function(e){if(sx===null)return;var d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)show(cur+(d<0?1:-1));sx=null;});
 })();
