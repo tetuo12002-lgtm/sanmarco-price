@@ -248,7 +248,7 @@
   var LAST="2026-12-20";
   function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
   function formUrl(t,n,price){
-    var memo="【お正月のお花】"+(t==="h"?"会社・お店用":"ご家庭用")+(n?"　写真"+n+"番（"+price+"円・税別）のような感じで":"");
+    var memo="【お正月のお花】"+(t==="h"?"会社・お店用":"ご家庭用")+(n?"　写真"+n+"番（"+price+"円・税別）のような感じで（写真はイメージとご案内済み）":"");
     var q="purpose="+encodeURIComponent("その他")+"&style="+encodeURIComponent("アレンジメント")+"&shogatsu="+t+(n?"&photo="+n+"&price="+encodeURIComponent(price):"")+"&memo="+encodeURIComponent(memo);
     return FORM+"?"+q;
   }
