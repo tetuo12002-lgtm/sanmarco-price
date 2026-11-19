@@ -454,7 +454,7 @@ function render(step){
    それより前 → お電話 */
 const ORDER_DAYS = 3;                                  // 何日後からメール・フォームで受けるか
 const ORDER_MAIL = "chumon@sunmarco.xsrv.jp";           // メールの送り先
-const ORDER_FORM_URL = "";                             // 注文フォームを公開したら、そのページのURLを入れる（空ならメールだけ）
+const ORDER_FORM_URL = "https://sunmarco.xsrv.jp/wp/%e3%81%94%e6%b3%a8%e6%96%87%e3%83%95%e3%82%a9%e3%83%bc%e3%83%a0/";                             // 注文フォームを公開したら、そのページのURLを入れる（空ならメールだけ）
 const WD = ["日","月","火","水","木","金","土"];
 function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 function jpDate(d){ return `${d.getMonth()+1}月${d.getDate()}日（${WD[d.getDay()]}）`; }
