@@ -172,10 +172,11 @@ const SCENES = {
       tips:["訪問先には、花瓶のいらないアレンジが気をつかわせません","メッセージカードもご用意できます"]},
   ],
   sonae: [
-    {id:"sougi",   ico:"🕯️", name:"ご葬儀（通夜・告別式）", sub:"斎場・ご自宅へ", rec:["arrange"],
+    {id:"sougi",   ico:"🕯️", name:"ご葬儀（通夜・告別式）", sub:"斎場・ご自宅へ", rec:["arrange","stand"],
       colors:["おまかせ","白・グリーン中心","白に淡い色を少し"],
       tips:["名札（立札）を付けられます。贈り主のお名前をお伝えください","斎場へ届ける場合は、斎場名・故人のお名前・日時をお知らせください",
-            "斎場によって持込料がかかります（やわらぎ 600円、ベルコ・ファミーユ 500円、税込）。お花が7,000円（税別）以上なら、お店が負担します"]},
+            "斎場によって持込料がかかります（やわらぎ 600円、ベルコ・ファミーユ 500円、税込）。お花が7,000円（税別）以上なら、お店が負担します",
+            "スタンド花は、持込料も配達料もお店が負担します"]},
     {id:"houyou",  ico:"📿", name:"四十九日・一周忌などの法要", sub:"お寺・ご自宅へ", rec:["arrange","hanataba"],
       tips:["四十九日を過ぎたら、淡い色を入れることもあります","故人の好きだった花や色でお作りすることもできます"]},
     {id:"ohaka",   ico:"🪦", name:"お墓参り・お盆・お彼岸", sub:"お墓に供える", rec:["butsuka"],
@@ -215,6 +216,7 @@ const STYLES = {
   arrange:  {ico:"🧺", name:"アレンジ",   sub:"かごに挿してあるので、花瓶なしでそのまま飾れます（お作りに30分前後）", wait:"30分前後"},
   butsuka:  {ico:"🪷", name:"仏花（1対）", sub:"お墓・お仏壇に左右一対で供える束"},
   hachi:    {ico:"🪴", name:"鉢花",       sub:"根があるので長く楽しめます"},
+  stand:    {ico:"🏵️", name:"スタンド花", sub:"斎場に飾る、脚の付いた大きなお花。1段 15,000円・2段 20,000円（税別）。持込料・配達料はかかりません"},
   omakase:  {ico:"🙋", name:"決まっていない", sub:"スタッフと相談して決めます"},
 };
 
@@ -275,6 +277,13 @@ const STYLE_BY_PURPOSE = {
 
 /* 予算（popular=よく選ばれる） */
 const BUDGETS = [1000,2000,3000,5000,7000,10000,20000,30000];
+/* スタンド花（ご葬儀）。b は税込 */
+const STAND = [{n:"1段", zei:15000, b:16500}, {n:"2段", zei:20000, b:22000}];
+function budgetText(){
+  if(typeof state.b!=="number") return "相談したい";
+  if(state.s==="stand"){ const x = STAND.find(x => x.b===state.b); if(x) return `${x.n} ${yen(x.zei)}（税別）＝${yen(x.b)}（税込）`; }
+  return yen(state.b)+"くらい";
+}
 function popular(p, s){
   if(s==="hanataba") return [3000];
   if(s==="arrange")  return [5000];
@@ -410,6 +419,15 @@ function render(step){
       <button class="back" onclick="back()">← もどる</button>`;
     return;
   }
+  if(step===4 && state.s==="stand"){
+    app.innerHTML = `<h2>④ 何段にしますか？</h2><p class="hint">スタンド花は、持込料も配達料もお店が負担します。</p>
+      <div class="opts">${STAND.map(x => `
+        <button class="opt" onclick="state.b=${x.b};go(5)"><span class="ico">🏵️</span>
+        <span><b>${x.n}　${yen(x.zei)}（税別）</b><small>税込 ${yen(x.b)}</small></span></button>`).join("")}
+        <button class="opt" onclick="state.b='相談';go(5)"><span class="ico">💬</span><span><b>相談したい</b><small>段数や大きさをお店と決めます</small></span></button></div>
+      <button class="back" onclick="back()">← もどる</button>`;
+    return;
+  }
   if(step===4){
     const pop = popular(state.p, state.s);
     const list = state.p==="sonae" ? BUDGETS.filter(b => b>=2000 && b<=20000) : BUDGETS;
@@ -436,7 +454,7 @@ function render(step){
         <tr><th>用途</th><td>${esc(pName())}</td></tr>
         ${sc ? `<tr><th>場面</th><td>${esc(sc.name)}</td></tr>` : ""}
         <tr><th>形</th><td>${esc(STYLES[state.s].name)}</td></tr>
-        <tr><th>ご予算</th><td>${typeof state.b==="number" ? yen(state.b)+"くらい" : "相談したい"}</td></tr>
+        <tr><th>ご予算</th><td>${esc(budgetText())}</td></tr>
         <tr><th>色</th><td>${esc(cs[state.c])}</td></tr></table>
         ${typeof state.b==="number" && photosFor(state.b).length ? `<div class="ref"><img src="photos/${esc(photosFor(state.b)[0])}" alt="参考写真">${photoNo(photosFor(state.b)[0]) ? `<div><span class="refno">写真 No.${photoNo(photosFor(state.b)[0])}</span></div>` : ""}${sizeHtml(photosFor(state.b)[0])}<small>参考にした写真</small></div>` : ""}</div>
       ${WEB && state.sc==="sougi" ? sougiBox() : WEB ? `<div class="order"><b>📅 お届け・お受け取りのご希望日は？</b>
@@ -492,7 +510,8 @@ function sougiBox(){
     <div class="note" style="margin-top:12px"><b>斎場への持込料について</b><ul>
       <li>斎場によって持込料がかかります：やわらぎ 600円、ベルコ・ファミーユ 500円（税込）</li>
       <li>お花が <b style="display:inline">7,000円（税別）以上</b>のときは、持込料はお店が負担します</li>
-      <li>ほかの斎場では、スタンド花だけ持込料がかかる場合などがあります。ご注文のときにお知らせします</li></ul></div>
+      <li>ほかの斎場では、スタンド花だけ持込料がかかる場合などがあります。ご注文のときにお知らせします</li>
+      <li><b style="display:inline">スタンド花</b>は、持込料も配達料もお店が負担します</li></ul></div>
     <p class="hint" style="margin:8px 0 0">${SOUGI_OFF}</p></div>`;
 }
 
@@ -513,7 +532,7 @@ function memoLines(){
     `用途：${pName()}`,
     sc ? `場面：${sc.name}` : "",
     `形：${STYLES[state.s].name}`,
-    `ご予算：${typeof state.b==="number" ? yen(state.b)+"くらい" : "相談したい"}`,
+    `ご予算：${budgetText()}`,
     `色：${cs[state.c]}`,
     no ? `参考写真：No.${no}` : "",
   ].filter(Boolean);
